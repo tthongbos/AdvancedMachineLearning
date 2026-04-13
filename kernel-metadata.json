@@ -1,0 +1,15 @@
+{
+  "id": "thithngnguyn/aggressive-2048-rainbow-highmean",
+  "title": "Aggressive 2048 Rainbow HighMean",
+  "code_file": "Aggressive_2048_Rainbow_HighMean.ipynb",
+  "language": "python",
+  "kernel_type": "notebook",
+  "is_private": true,
+  "enable_gpu": true,
+  "enable_tpu": false,
+  "enable_internet": false,
+  "dataset_sources": [],
+  "competition_sources": [],
+  "kernel_sources": [],
+  "model_sources": []
+}
