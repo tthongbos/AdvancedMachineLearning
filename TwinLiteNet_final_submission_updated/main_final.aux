@@ -1,0 +1,107 @@
+\relax 
+\providecommand\hyper@newdestlabel[2]{}
+\providecommand\HyField@AuxAddToFields[1]{}
+\providecommand\HyField@AuxAddToCoFields[2]{}
+\citation{ref1}
+\citation{ref1,ref2}
+\citation{ref3,ref4}
+\@writefile{toc}{\contentsline {section}{\numberline {I}Introduction}{1}{section.1}\protected@file@percent }
+\citation{ref5}
+\citation{ref6,ref7}
+\citation{ref1}
+\citation{ref1,ref2}
+\citation{ref8}
+\citation{ref9}
+\citation{ref10}
+\citation{ref1,ref2}
+\citation{ref3}
+\citation{ref4}
+\citation{ref1,ref5,ref6,ref7}
+\citation{ref8,ref9,ref10}
+\citation{ref1}
+\citation{ref3,ref4}
+\@writefile{toc}{\contentsline {section}{\numberline {II}Related Work}{2}{section.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {II-A}}Lightweight Road-Scene Segmentation}{2}{subsection.2.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {II-B}}Domain Shift and Adaptation for Segmentation}{2}{subsection.2.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {II-C}}Road-Scene Benchmarks and Label Alignment}{2}{subsection.2.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {II-D}}Position of This Study}{2}{subsection.2.4}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {III}Methodology}{2}{section.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {III-A}}Base Architecture}{2}{subsection.3.1}\protected@file@percent }
+\citation{ref2,ref4}
+\citation{ref2,ref3,ref4}
+\citation{ref1,ref2}
+\citation{ref3,ref4}
+\citation{ref1}
+\@writefile{lof}{\contentsline {figure}{\numberline {1}{\ignorespaces Overall architecture of TwinLiteNet+. The original shared encoder, PCAA module, and two task-specific decoders are kept unchanged. The figure is intentionally simplified so that the caption explains the role of the architecture rather than repeating implementation details inside the diagram.}}{3}{figure.1}\protected@file@percent }
+\newlabel{fig:twinlitenet_arch}{{1}{3}{Overall architecture of TwinLiteNet+. The original shared encoder, PCAA module, and two task-specific decoders are kept unchanged. The figure is intentionally simplified so that the caption explains the role of the architecture rather than repeating implementation details inside the diagram}{figure.1}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {III-B}}Target Label Construction}{3}{subsection.3.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {III-C}}Transfer Protocol}{3}{subsection.3.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {IV}Experiments}{3}{section.4}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {IV-A}}Experimental Setup}{3}{subsection.4.1}\protected@file@percent }
+\citation{ref1}
+\citation{ref1,ref12,ref13}
+\citation{ref11}
+\@writefile{lof}{\contentsline {figure}{\numberline {2}{\ignorespaces Label harmonization process for Cityscapes and Mapillary Vistas. The target datasets provide semantic segmentation labels, so their annotations are converted into the two branches required by TwinLiteNet+: drivable area and lane-related regions. The Cityscapes lane branch is based on a proxy label, while Mapillary Vistas provides richer road-marking information.}}{4}{figure.2}\protected@file@percent }
+\newlabel{fig:label_harmonization}{{2}{4}{Label harmonization process for Cityscapes and Mapillary Vistas. The target datasets provide semantic segmentation labels, so their annotations are converted into the two branches required by TwinLiteNet+: drivable area and lane-related regions. The Cityscapes lane branch is based on a proxy label, while Mapillary Vistas provides richer road-marking information}{figure.2}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {I}{\ignorespaces Datasets and target-label construction used in this study.}}{4}{table.1}\protected@file@percent }
+\newlabel{tab:dataset_summary}{{I}{4}{Datasets and target-label construction used in this study}{table.1}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {IV-B}}Evaluation Metrics}{4}{subsection.4.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {IV-C}}Implementation Details}{4}{subsection.4.3}\protected@file@percent }
+\citation{ref1}
+\citation{ref1}
+\citation{ref2,ref4}
+\citation{ref3}
+\@writefile{lot}{\contentsline {table}{\numberline {II}{\ignorespaces Training configuration used in this study.}}{5}{table.2}\protected@file@percent }
+\newlabel{tab:train_config}{{II}{5}{Training configuration used in this study}{table.2}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {3}{\ignorespaces Cross-dataset transfer protocol. The same pretrained checkpoint is evaluated directly and then fine-tuned on each target dataset. Both settings are evaluated with drivable area mIoU, lane accuracy, and lane IoU.}}{5}{figure.3}\protected@file@percent }
+\newlabel{fig:experimental_protocol}{{3}{5}{Cross-dataset transfer protocol. The same pretrained checkpoint is evaluated directly and then fine-tuned on each target dataset. Both settings are evaluated with drivable area mIoU, lane accuracy, and lane IoU}{figure.3}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {IV-D}}Source-Domain Re-Validation}{5}{subsection.4.4}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {III}{\ignorespaces Source-domain re-validation on BDD100K.}}{5}{table.3}\protected@file@percent }
+\newlabel{tab:bdd_reval}{{III}{5}{Source-domain re-validation on BDD100K}{table.3}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {IV}{\ignorespaces Direct transfer results on Mapillary Vistas.}}{5}{table.4}\protected@file@percent }
+\newlabel{tab:mapillary_direct}{{IV}{5}{Direct transfer results on Mapillary Vistas}{table.4}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {V}{\ignorespaces Direct transfer results on Cityscapes.}}{5}{table.5}\protected@file@percent }
+\newlabel{tab:cityscapes_direct}{{V}{5}{Direct transfer results on Cityscapes}{table.5}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {IV-E}}Direct Transfer Results}{5}{subsection.4.5}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {\mbox  {IV-E}1}Mapillary Vistas}{5}{subsubsection.4.5.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {\mbox  {IV-E}2}Cityscapes}{5}{subsubsection.4.5.2}\protected@file@percent }
+\citation{ref5,ref6,ref7}
+\citation{ref8,ref9,ref10}
+\citation{ref1}
+\citation{ref5}
+\citation{ref6,ref7}
+\citation{ref8}
+\citation{ref9}
+\citation{ref10}
+\citation{ref1}
+\@writefile{lot}{\contentsline {table}{\numberline {VI}{\ignorespaces Fine-tuning results on Mapillary Vistas.}}{6}{table.6}\protected@file@percent }
+\newlabel{tab:mapillary_ft}{{VI}{6}{Fine-tuning results on Mapillary Vistas}{table.6}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {VII}{\ignorespaces Fine-tuning results on Cityscapes.}}{6}{table.7}\protected@file@percent }
+\newlabel{tab:cityscapes_ft}{{VII}{6}{Fine-tuning results on Cityscapes}{table.7}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {IV-F}}Fine-Tuning Results}{6}{subsection.4.6}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {\mbox  {IV-F}1}Mapillary Vistas}{6}{subsubsection.4.6.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {\mbox  {IV-F}2}Cityscapes}{6}{subsubsection.4.6.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {IV-G}}Transfer Gain Summary}{6}{subsection.4.7}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {VIII}{\ignorespaces Fine-tuning gains for the Large variant.}}{6}{table.8}\protected@file@percent }
+\newlabel{tab:large_gain}{{VIII}{6}{Fine-tuning gains for the Large variant}{table.8}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {IV-H}}Comparison with Prior Work}{6}{subsection.4.8}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {IV-I}}Discussion}{6}{subsection.4.9}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {IX}{\ignorespaces Conceptual comparison with representative prior work.}}{7}{table.9}\protected@file@percent }
+\newlabel{tab:prior_comparison}{{IX}{7}{Conceptual comparison with representative prior work}{table.9}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {IV-J}}Scope and Limitations}{7}{subsection.4.10}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {V}Conclusion}{7}{section.5}\protected@file@percent }
+\bibcite{ref1}{1}
+\bibcite{ref2}{2}
+\bibcite{ref3}{3}
+\bibcite{ref4}{4}
+\bibcite{ref5}{5}
+\bibcite{ref6}{6}
+\bibcite{ref7}{7}
+\bibcite{ref8}{8}
+\bibcite{ref9}{9}
+\bibcite{ref10}{10}
+\bibcite{ref11}{11}
+\bibcite{ref12}{12}
+\bibcite{ref13}{13}
+\@writefile{toc}{\contentsline {section}{References}{8}{section*.1}\protected@file@percent }
+\gdef \@abspage@last{8}
