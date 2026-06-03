@@ -1,0 +1,34 @@
+1. Đọc và hiển thị ảnh
+   Sai số (MSE): 0.0000
+   Thủ công: 0.000351s | 134.97KB
+   OpenCV: 0.000232s | 132.17KB
+
+2. Scale
+   Sai số (MSE): 12.3419
+   Thủ công: 12.695313s | 446.31KB
+   OpenCV: 0.000243s | 432.45KB
+
+3. Xoay ảnh
+   Sai số (MSE): 0.0000
+   Thủ công: 0.646425s | 68.04KB
+   OpenCV: 0.000135s | 66.62KB
+
+4. Chuyển xám
+   Sai số (MSE): 0.4917
+   Thủ công: 0.628260s | 27.72KB
+   OpenCV: 0.000048s | 22.24KB
+
+5. RGB -> HSV
+   Sai số (MSE): 236.2391
+   Thủ công: 0.882553s | 67.88KB
+   OpenCV: 0.000115s | 66.18KB
+
+6. HSV -> RGB
+   Sai số (MSE): 0.2852
+   Thủ công: 1.888848s | 70.67KB
+   OpenCV: 0.000116s | 66.18KB
+
+7. Độ sáng và độ tương phản
+   Sai số (MSE): 0.3178
+   Thủ công: 0.000288s | 529.47KB
+   OpenCV: 0.000053s | 66.29KB
