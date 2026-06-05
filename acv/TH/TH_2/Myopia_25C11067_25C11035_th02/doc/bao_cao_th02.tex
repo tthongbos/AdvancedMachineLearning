@@ -1,0 +1,163 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage{fontspec}
+\setmainfont{TeX Gyre Termes}
+\usepackage[a4paper,margin=2.2cm]{geometry}
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{array}
+\usepackage{hyperref}
+\usepackage{amsmath}
+\usepackage{enumitem}
+\hypersetup{colorlinks=true, linkcolor=blue, urlcolor=blue}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{6pt}
+\renewcommand{\arraystretch}{1.25}
+
+\begin{document}
+
+\begin{center}
+    {\Large\textbf{BÁO CÁO THỰC HÀNH 02}}\\[4pt]
+    {\large\textbf{Làm trơn ảnh và phát hiện biên cạnh}}\\[8pt]
+    \textbf{Nhóm:} Myopia\\[4pt]
+    \begin{tabular}{ll}
+        25C11067 & Nguyễn Thái Thông \\
+        25C11035 & Trần Hạ Khánh Duy
+    \end{tabular}
+\end{center}
+
+\section{Mục tiêu}
+
+Bài thực hành gồm hai nhóm nội dung chính: làm trơn ảnh và phát hiện biên cạnh. Phần làm trơn ảnh cài đặt và so sánh các bộ lọc mean filter, Gaussian filter và median filter. Phần phát hiện biên cạnh cài đặt và so sánh Sobel, Laplacian và Canny. Mỗi thuật toán được thực hiện bằng hai cách: cài đặt thủ công và dùng hàm OpenCV, sau đó đánh giá bằng hình minh chứng, MSE, thời gian chạy và bộ nhớ sử dụng.
+
+\section{Phân công đóng góp}
+
+\begin{longtable}{p{0.16\textwidth}p{0.26\textwidth}p{0.46\textwidth}p{0.10\textwidth}}
+\toprule
+\textbf{MSHV} & \textbf{Họ tên} & \textbf{Công việc} & \textbf{Tỉ lệ} \\
+\midrule
+25C11067 & Nguyễn Thái Thông & Cài đặt mean filter, Gaussian filter, Sobel; xây dựng hàm đo thời gian/bộ nhớ, kiểm thử kết quả thủ công so với OpenCV, thu thập hình minh chứng cho phần làm trơn và Sobel. & 50\% \\
+25C11035 & Trần Hạ Khánh Duy & Cài đặt median filter, Laplacian, Canny; tổng hợp số liệu MSE, nhận xét kết quả, lưu output, hoàn thiện notebook và viết báo cáo. & 50\% \\
+\bottomrule
+\end{longtable}
+
+\section{Bảng tự đánh giá}
+
+\begin{longtable}{p{0.74\textwidth}>{\centering\arraybackslash}p{0.22\textwidth}}
+\toprule
+\textbf{Nội dung} & \textbf{Mức độ hoàn thành} \\
+\midrule
+Chuẩn bị môi trường, tải ảnh Lenna và hiển thị ảnh & 100\% \\
+Làm trơn ảnh bằng mean filter & 100\% \\
+Làm trơn ảnh bằng Gaussian filter & 100\% \\
+Làm trơn ảnh bằng median filter & 100\% \\
+Phát hiện biên cạnh bằng Sobel & 100\% \\
+Phát hiện biên cạnh bằng Laplacian & 100\% \\
+Phát hiện biên cạnh bằng Canny & 100\% \\
+So sánh với hàm OpenCV & 100\% \\
+Thu thập hình minh chứng và lưu kết quả & 100\% \\
+Báo cáo & 100\% \\
+\bottomrule
+\end{longtable}
+
+\section{Cơ sở lý thuyết tóm tắt}
+
+\subsection{Làm trơn ảnh}
+
+Làm trơn ảnh là bước tiền xử lý dùng để giảm nhiễu hoặc giảm các chi tiết nhỏ trong ảnh. Bộ lọc trung bình thay mỗi pixel bằng giá trị trung bình của vùng lân cận nên làm mờ đều. Bộ lọc Gaussian dùng trọng số lớn hơn cho các điểm gần tâm kernel, vì vậy ảnh sau lọc thường tự nhiên hơn so với mean filter. Bộ lọc median thay pixel bằng trung vị của vùng lân cận, phù hợp khi ảnh có nhiễu dạng điểm hoặc nhiễu muối tiêu.
+
+\subsection{Phát hiện biên cạnh}
+
+Biên cạnh là vùng có thay đổi cường độ sáng mạnh. Sobel dùng đạo hàm bậc một theo hai hướng $x$ và $y$, sau đó tính độ lớn gradient. Laplacian dùng đạo hàm bậc hai nên nhạy với các vùng biến thiên mạnh nhưng cũng dễ bị ảnh hưởng bởi nhiễu. Canny là phương pháp nhiều bước gồm làm trơn Gaussian, tính gradient, non-maximum suppression, ngưỡng kép và nối biên bằng hysteresis.
+
+\section{Đánh giá kết quả}
+
+\subsection{Ảnh đầu vào}
+
+Ảnh Lenna được tải và resize về kích thước nhỏ hơn để các thuật toán thủ công chạy nhanh. Ảnh màu được chuyển sang ảnh xám trước khi áp dụng các thuật toán phát hiện biên.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.80\textwidth]{figures/01_lenna.png}
+    \caption{Ảnh Lenna màu và ảnh Lenna xám.}
+\end{figure}
+
+\subsection{Làm trơn ảnh}
+
+Mean filter làm giảm nhiễu bằng cách lấy trung bình các pixel trong vùng lân cận. Kết quả thủ công và OpenCV có hình dạng trực quan tương tự nhau; sai khác nhỏ có thể đến từ cách xử lý biên và làm tròn giá trị pixel.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{figures/02_mean_filter.png}
+    \caption{So sánh mean filter thủ công và OpenCV.}
+\end{figure}
+
+Gaussian filter dùng kernel có trọng số theo phân phối Gaussian. So với mean filter, bộ lọc này thường giữ cấu trúc ảnh mềm và tự nhiên hơn vì pixel gần tâm có ảnh hưởng lớn hơn pixel xa tâm.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{figures/03_gaussian_filter.png}
+    \caption{So sánh Gaussian filter thủ công và OpenCV.}
+\end{figure}
+
+Median filter lấy trung vị trong vùng lân cận, do đó có khả năng loại bỏ nhiễu điểm tốt. Kết quả có xu hướng giữ biên tốt hơn mean filter trong một số vùng ảnh.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{figures/04_median_filter.png}
+    \caption{So sánh median filter thủ công và OpenCV.}
+\end{figure}
+
+\subsection{Phát hiện biên cạnh}
+
+Sobel phát hiện biên bằng cách tính gradient theo hai hướng. Ảnh biên thể hiện rõ các vùng thay đổi cường độ sáng như đường viền khuôn mặt, nón và vai áo trong ảnh Lenna.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{figures/05_sobel.png}
+    \caption{So sánh phát hiện biên Sobel thủ công và OpenCV.}
+\end{figure}
+
+Laplacian dùng đạo hàm bậc hai nên phản ứng mạnh tại vùng có thay đổi cường độ đột ngột. Trước khi áp dụng Laplacian, ảnh được làm trơn Gaussian để giảm bớt nhiễu.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{figures/06_laplacian.png}
+    \caption{So sánh phát hiện biên Laplacian thủ công và OpenCV.}
+\end{figure}
+
+Canny tạo biên mảnh hơn nhờ bước non-maximum suppression và ngưỡng kép. Kết quả thủ công có thể khác OpenCV nhiều hơn Sobel và Laplacian vì OpenCV tối ưu nhiều chi tiết nội bộ trong quá trình làm mảnh và nối biên.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{figures/07_canny.png}
+    \caption{So sánh phát hiện biên Canny thủ công và OpenCV.}
+\end{figure}
+
+\subsection{So sánh kết quả}
+
+Bảng dưới đây được điền theo kết quả lưu trong file \texttt{result.txt} sau khi chạy notebook. Do thời gian và bộ nhớ phụ thuộc vào máy chạy, các giá trị cụ thể nên được lấy từ lần chạy thực nghiệm cuối cùng.
+
+\begin{longtable}{p{0.22\textwidth}p{0.13\textwidth}p{0.18\textwidth}p{0.18\textwidth}p{0.23\textwidth}}
+\toprule
+\textbf{Phép xử lý} & \textbf{MSE} & \textbf{Thủ công} & \textbf{OpenCV} & \textbf{Nhận xét} \\
+\midrule
+Mean filter & Theo \texttt{result.txt} & Theo \texttt{result.txt} & Theo \texttt{result.txt} & Hai kết quả gần nhau; sai khác chủ yếu ở xử lý biên và làm tròn. \\
+Gaussian filter & Theo \texttt{result.txt} & Theo \texttt{result.txt} & Theo \texttt{result.txt} & Kết quả trực quan tương tự; OpenCV nhanh hơn nhờ tối ưu tích chập. \\
+Median filter & Theo \texttt{result.txt} & Theo \texttt{result.txt} & Theo \texttt{result.txt} & Median thủ công chậm hơn do phải tính trung vị cho từng cửa sổ. \\
+Sobel & Theo \texttt{result.txt} & Theo \texttt{result.txt} & Theo \texttt{result.txt} & Biên chính được phát hiện rõ; sai khác nhỏ có thể do padding và kiểu dữ liệu. \\
+Laplacian & Theo \texttt{result.txt} & Theo \texttt{result.txt} & Theo \texttt{result.txt} & Phản ứng mạnh tại vùng biến thiên cường độ; nhạy với nhiễu nên cần Gaussian trước. \\
+Canny & Theo \texttt{result.txt} & Theo \texttt{result.txt} & Theo \texttt{result.txt} & Sai khác có thể lớn hơn vì Canny gồm nhiều bước và OpenCV có tối ưu nội bộ. \\
+\bottomrule
+\end{longtable}
+
+Nhìn chung, cài đặt thủ công giúp hiểu rõ nguyên lý của từng thuật toán, nhưng tốc độ chậm hơn do sử dụng vòng lặp Python. OpenCV phù hợp hơn khi cần xử lý nhanh, ổn định và triển khai thực tế.
+
+\section{Kết luận}
+
+Bài thực hành hoàn thành hai nhóm nội dung: làm trơn ảnh và phát hiện biên cạnh. Các bộ lọc làm trơn giúp giảm nhiễu và chuẩn bị ảnh tốt hơn cho bước phát hiện biên. Các thuật toán phát hiện biên cho thấy nhiều cách tiếp cận khác nhau: Sobel dựa trên gradient bậc một, Laplacian dựa trên đạo hàm bậc hai, còn Canny kết hợp nhiều bước để tạo biên mảnh và rõ hơn.
+
+Kết quả so sánh cho thấy OpenCV nhanh hơn đáng kể so với cài đặt thủ công. Tuy nhiên, phần cài đặt thủ công vẫn cần thiết trong bài thực hành vì giúp kiểm chứng công thức, hiểu rõ xử lý kernel, padding, gradient, ngưỡng và quá trình tạo ảnh biên.
+
+\end{document}

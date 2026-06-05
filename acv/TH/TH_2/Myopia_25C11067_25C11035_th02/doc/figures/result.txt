@@ -1,0 +1,29 @@
+1. Mean filter
+   Sai số (MSE): 0.0000
+   Thủ công: 0.359042s | 1077.81KB
+   OpenCV: 0.000061s | 66.35KB
+
+2. Gaussian filter
+   Sai số (MSE): 0.0053
+   Thủ công: 0.227804s | 801.73KB
+   OpenCV: 0.000117s | 66.35KB
+
+3. Median filter
+   Sai số (MSE): 0.4045
+   Thủ công: 0.825825s | 217.20KB
+   OpenCV: 0.000165s | 66.18KB
+
+4. Sobel
+   Sai số (MSE): 0.2713
+   Thủ công: 0.498759s | 470.88KB
+   OpenCV: 0.000230s | 397.21KB
+
+5. Laplacian
+   Sai số (MSE): 0.3692
+   Thủ công: 0.335916s | 294.42KB
+   OpenCV: 0.000147s | 88.54KB
+
+6. Canny
+   Sai số (MSE): 4629.7798
+   Thủ công: 0.509045s | 562.58KB
+   OpenCV: 0.000195s | 44.40KB
