@@ -7,6 +7,7 @@
 \usepackage{booktabs}
 \usepackage{longtable}
 \usepackage{array}
+\usepackage{fancyhdr}
 \usepackage{hyperref}
 \usepackage{amsmath}
 \usepackage{enumitem}
@@ -14,18 +15,46 @@
 \setlength{\parindent}{0pt}
 \setlength{\parskip}{6pt}
 \renewcommand{\arraystretch}{1.25}
+\setlength{\headheight}{15pt}
+
+\pagestyle{fancy}
+\fancyhf{}
+\fancyfoot[C]{\thepage}
+\renewcommand{\headrulewidth}{0pt}
 
 \begin{document}
 
-\begin{center}
-    {\Large\textbf{BÁO CÁO THỰC HÀNH 02}}\\[4pt]
-    {\large\textbf{Làm trơn ảnh và phát hiện biên cạnh}}\\[8pt]
-    \textbf{Nhóm:} Myopia\\[4pt]
-    \begin{tabular}{ll}
-        25C11067 & Nguyễn Thái Thông \\
-        25C11035 & Trần Hạ Khánh Duy
+\begin{titlepage}
+    \thispagestyle{empty}
+    \centering
+
+    \vspace*{1.5cm}
+    \includegraphics[width=3.2cm]{../../../../../assets/rsz_logo-khtn.png}\par
+    \vspace{0.8cm}
+
+    {\Large\bfseries ĐẠI HỌC QUỐC GIA THÀNH PHỐ HỒ CHÍ MINH\par}
+    \vspace{0.2cm}
+    {\Large\bfseries TRƯỜNG ĐẠI HỌC KHOA HỌC TỰ NHIÊN\par}
+    \vspace{0.15cm}
+    {\large KHOA CÔNG NGHỆ THÔNG TIN\par}
+
+    \vspace{2.0cm}
+    {\Large\bfseries BÁO CÁO THỰC HÀNH 02\par}
+    \vspace{0.4cm}
+    {\large\bfseries Làm trơn ảnh và phát hiện biên cạnh\par}
+
+    \vspace{1.8cm}
+    \begin{tabular}{>{\bfseries}l l}
+        Nhóm: & Myopia \\
+        MSHV 1: & 25C11067 - Nguyễn Thái Thông \\
+        MSHV 2: & 25C11035 - Trần Hạ Khánh Duy
     \end{tabular}
-\end{center}
+
+    \vfill
+    {\large TP. Hồ Chí Minh, 2026\par}
+\end{titlepage}
+\clearpage
+\pagenumbering{arabic}
 
 \section{Mục tiêu}
 
@@ -143,16 +172,16 @@ Bảng dưới đây được điền theo kết quả lưu trong file \texttt{r
 \toprule
 \textbf{Phép xử lý} & \textbf{MSE} & \textbf{Thủ công} & \textbf{OpenCV} & \textbf{Nhận xét} \\
 \midrule
-Mean filter & Theo \texttt{result.txt} & Theo \texttt{result.txt} & Theo \texttt{result.txt} & Hai kết quả gần nhau; sai khác chủ yếu ở xử lý biên và làm tròn. \\
-Gaussian filter & Theo \texttt{result.txt} & Theo \texttt{result.txt} & Theo \texttt{result.txt} & Kết quả trực quan tương tự; OpenCV nhanh hơn nhờ tối ưu tích chập. \\
-Median filter & Theo \texttt{result.txt} & Theo \texttt{result.txt} & Theo \texttt{result.txt} & Median thủ công chậm hơn do phải tính trung vị cho từng cửa sổ. \\
-Sobel & Theo \texttt{result.txt} & Theo \texttt{result.txt} & Theo \texttt{result.txt} & Biên chính được phát hiện rõ; sai khác nhỏ có thể do padding và kiểu dữ liệu. \\
-Laplacian & Theo \texttt{result.txt} & Theo \texttt{result.txt} & Theo \texttt{result.txt} & Phản ứng mạnh tại vùng biến thiên cường độ; nhạy với nhiễu nên cần Gaussian trước. \\
-Canny & Theo \texttt{result.txt} & Theo \texttt{result.txt} & Theo \texttt{result.txt} & Sai khác có thể lớn hơn vì Canny gồm nhiều bước và OpenCV có tối ưu nội bộ. \\
+Mean filter & 0.0000 & 0.359042s | 1077.81KB & \textbf{0.000061s | 66.35KB} & Hai kết quả gần nhau; sai khác chủ yếu ở xử lý biên và làm tròn. \\
+Gaussian filter & 0.0053 & 0.227804s | 801.73KB & \textbf{0.000117s | 66.35KB} & Kết quả trực quan tương tự; OpenCV nhanh hơn nhờ tối ưu tích chập. \\
+Median filter & 0.4045 & 0.825825s | 217.20KB & \textbf{0.000165s | 66.18KB} & Median thủ công chậm hơn do phải tính trung vị cho từng cửa sổ. \\
+Sobel & 0.2713 & 0.498759s | 470.88KB & \textbf{0.000230s | 397.21KB} & Biên chính được phát hiện rõ; sai khác nhỏ có thể do padding và kiểu dữ liệu. \\
+Laplacian & 0.3692 & 0.335916s | 294.42KB & \textbf{0.000147s | 88.54KB} & Phản ứng mạnh tại vùng biến thiên cường độ; nhạy với nhiễu nên cần Gaussian trước. \\
+Canny & 4629.7798 & 0.509045s | 562.58KB & \textbf{0.000195s | 44.40KB} & Sai khác có thể lớn hơn vì Canny gồm nhiều bước và OpenCV có tối ưu nội bộ. \\
 \bottomrule
 \end{longtable}
 
-Nhìn chung, cài đặt thủ công giúp hiểu rõ nguyên lý của từng thuật toán, nhưng tốc độ chậm hơn do sử dụng vòng lặp Python. OpenCV phù hợp hơn khi cần xử lý nhanh, ổn định và triển khai thực tế.
+Nhìn chung, cài đặt thủ công giúp hiểu rõ nguyên lý của từng thuật toán, nhưng tốc độ chậm hơn do sử dụng vòng lặp Python. OpenCV phù hợp hơn khi cần xử lý nhanh, ổn định và triển khai thực tế. Trong các kết quả đo được, Mean filter có MSE thấp nhất, còn OpenCV luôn vượt trội về thời gian chạy và bộ nhớ sử dụng.
 
 \section{Kết luận}
 
