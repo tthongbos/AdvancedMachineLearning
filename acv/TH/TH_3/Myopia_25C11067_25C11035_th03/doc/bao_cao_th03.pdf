@@ -1,0 +1,167 @@
+%PDF-1.4
+1 0 obj
+<< /Type /Catalog /Pages 2 0 R >>
+endobj
+2 0 obj
+<< /Type /Pages /Kids [5 0 R 9 0 R 13 0 R 17 0 R 21 0 R] /Count 5 >>
+endobj
+3 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>
+endobj
+4 0 obj
+<< /Length 319 >>
+stream
+BT
+/F1 20 Tf
+72 760 Td
+(BAO CAO THUC HANH 03) Tj
+/F1 11 Tf
+0 -34 Td
+(Phat hien doi tuong voi YOLO, DETR va Faster R-CNN) Tj
+0 -26 Td
+(Nhom: Myopia) Tj
+0 -26 Td
+(25C11067 - Nguyen Thai Thong) Tj
+0 -26 Td
+(25C11035 - Tran Ha Khanh Duy) Tj
+0 -26 Td
+(Ban PDF rut gon; nguon bao cao day du nam trong bao_cao_th03.tex.) Tj
+ET
+endstream
+endobj
+5 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 3 0 R >> >> /Contents 4 0 R >>
+endobj
+8 0 obj
+<< /Length 594 >>
+stream
+BT
+/F1 20 Tf
+72 760 Td
+(MO TA CHI TIET TAP DU LIEU) Tj
+/F1 11 Tf
+0 -34 Td
+(Dataset: Chess Pieces - v25 odsc-v1, xuat tu Roboflow ngay 14/03/2023.) Tj
+0 -26 Td
+(Du lieu gom anh ban co chup tu goc nhin co dinh, camera dat lech ben trai ban co.) Tj
+0 -26 Td
+(Bai toan: phat hien bounding box tung quan co va phan loai theo mau/loai quan.) Tj
+0 -26 Td
+(License: Public Domain theo mo ta Roboflow.) Tj
+0 -26 Td
+(Preprocess: auto-orientation, xoa EXIF-orientation, resize stretch ve 416x416.) Tj
+0 -26 Td
+(Augmentation: tao 3 phien ban moi anh goc, random crop 0-10%, brightness -15% den +15%.) Tj
+ET
+endstream
+endobj
+9 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 3 0 R >> >> /Contents 8 0 R >>
+endobj
+12 0 obj
+<< /Length 877 >>
+stream
+BT
+/F1 20 Tf
+72 760 Td
+(THONG KE DATASET) Tj
+/F1 11 Tf
+0 -34 Td
+(Tong: 693 anh, 7086 bounding boxes, 13 lop.) Tj
+0 -26 Td
+(Train: 606 anh / 6324 boxes; Validation: 58 anh / 386 boxes; Test: 29 anh / 376 boxes.) Tj
+0 -26 Td
+(Cac lop: bishop, black-bishop, black-king, black-knight, black-pawn, black-queen, black-) Tj
+0 -18 Td
+(rook, white-bishop, white-king, white-knight, white-pawn, white-queen, white-rook.) Tj
+0 -26 Td
+(Lop black-pawn co 1651 boxes va white-pawn co 1587 boxes, chiem nhieu nhat.) Tj
+0 -26 Td
+(Lop bishop tong quat chi co 3 boxes o train va khong co trong valid/test.) Tj
+0 -26 Td
+(Annotation goc: image.jpg x1,y1,x2,y2,class_id ... voi toa do pixel tuyet doi.) Tj
+0 -26 Td
+(Link goc: https://universe.roboflow.com/joseph-nelson/chess-pieces-new) Tj
+0 -26 Td
+(Link reup: thay REPLACE_WITH_GROUP_REUPLOAD_LINK bang link Google Drive/OneDrive cua nhom.) Tj
+ET
+endstream
+endobj
+13 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 3 0 R >> >> /Contents 12 0 R >>
+endobj
+16 0 obj
+<< /Length 602 >>
+stream
+BT
+/F1 20 Tf
+72 760 Td
+(MA NGUON VA THU VIEN) Tj
+/F1 11 Tf
+0 -34 Td
+(File chinh: source/th03_object_detection.py da duoc chu thich ro quanh tung thao tac chinh.) Tj
+0 -26 Td
+(File dac ta thu vien: source/requirements.txt.) Tj
+0 -26 Td
+(prepare: chuyen annotation sang YOLO txt va COCO json.) Tj
+0 -26 Td
+(figures: sinh sample_ground_truth.png, split_distribution.png, class_distribution.png.) Tj
+0 -26 Td
+(YOLO: yolov8n.pt pretrained qua Ultralytics.) Tj
+0 -26 Td
+(DETR: facebook/detr-resnet-50 qua Hugging Face Transformers.) Tj
+0 -26 Td
+(Faster R-CNN: ResNet-50 FPN pretrained qua TorchVision.) Tj
+ET
+endstream
+endobj
+17 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 3 0 R >> >> /Contents 16 0 R >>
+endobj
+20 0 obj
+<< /Length 493 >>
+stream
+BT
+/F1 20 Tf
+72 760 Td
+(LENH CHAY VA KET LUAN) Tj
+/F1 11 Tf
+0 -34 Td
+(python th03_object_detection.py prepare) Tj
+0 -26 Td
+(python th03_object_detection.py figures) Tj
+0 -26 Td
+(python th03_object_detection.py yolo --epochs 50 --batch-size 8) Tj
+0 -26 Td
+(python th03_object_detection.py detr --epochs 20 --batch-size 2) Tj
+0 -26 Td
+(python th03_object_detection.py fasterrcnn --epochs 20 --batch-size 2) Tj
+0 -26 Td
+(Can chay tren Colab/GPU de dien mAP va thoi gian suy luan cuoi cung.) Tj
+ET
+endstream
+endobj
+21 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 3 0 R >> >> /Contents 20 0 R >>
+endobj
+xref
+0 14
+0000000000 65535 f 
+0000000009 00000 n 
+0000000058 00000 n 
+0000000142 00000 n 
+0000000212 00000 n 
+0000000582 00000 n 
+0000000708 00000 n 
+0000001353 00000 n 
+0000001479 00000 n 
+0000002408 00000 n 
+0000002536 00000 n 
+0000003190 00000 n 
+0000003318 00000 n 
+0000003863 00000 n 
+trailer
+<< /Size 14 /Root 1 0 R >>
+startxref
+3991
+%%EOF

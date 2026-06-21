@@ -1,0 +1,230 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage{fontspec}
+\setmainfont{TeX Gyre Termes}
+\usepackage[a4paper,margin=2.2cm]{geometry}
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{array}
+\usepackage{hyperref}
+\usepackage{enumitem}
+\hypersetup{colorlinks=true, linkcolor=blue, urlcolor=blue}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{6pt}
+\renewcommand{\arraystretch}{1.22}
+
+\begin{document}
+
+\begin{titlepage}
+    \centering
+    \vspace*{1.2cm}
+    \IfFileExists{../../../../../assets/rsz_logo-khtn.png}
+    {\includegraphics[width=3.0cm]{../../../../../assets/rsz_logo-khtn.png}\par}
+    {\vspace{3.0cm}\par}
+    \vspace{0.8cm}
+    {\Large\bfseries ĐẠI HỌC QUỐC GIA TP. HỒ CHÍ MINH\par}
+    {\Large\bfseries TRƯỜNG ĐẠI HỌC KHOA HỌC TỰ NHIÊN\par}
+    \vspace{1.8cm}
+    {\Large\bfseries BÁO CÁO THỰC HÀNH 03\par}
+    \vspace{0.35cm}
+    {\large\bfseries Phát hiện đối tượng với YOLO, DETR và Faster R-CNN\par}
+    \vspace{1.5cm}
+    \begin{tabular}{>{\bfseries}l l}
+        Nhóm: & Myopia \\
+        MSHV 1: & 25C11067 - Nguyễn Thái Thông \\
+        MSHV 2: & 25C11035 - Trần Hạ Khánh Duy
+    \end{tabular}
+    \vfill
+    {\large TP. Hồ Chí Minh, 2026\par}
+\end{titlepage}
+
+\section{Mục tiêu}
+
+Bài thực hành triển khai bài toán phát hiện quân cờ trên ảnh bàn cờ bằng ba hướng tiếp cận:
+\begin{itemize}[leftmargin=1.2cm]
+    \item YOLO: mô hình một giai đoạn, tối ưu tốc độ suy luận;
+    \item DETR: mô hình phát hiện đối tượng dựa trên Transformer;
+    \item Faster R-CNN: mô hình hai giai đoạn được chọn làm mô hình bổ sung ngoài YOLO và DETR.
+\end{itemize}
+
+Mã nguồn được tổ chức trong thư mục \texttt{source}. File chính \texttt{th03\_object\_detection.py} có các lệnh chuẩn bị dữ liệu, sinh hình minh chứng và huấn luyện từng mô hình. Notebook \texttt{th03.ipynb} dùng để chạy theo từng ô khi thực nghiệm trên Google Colab hoặc máy có GPU.
+
+\section{Tập dữ liệu}
+
+\subsection{Mô tả chi tiết}
+
+Tập dữ liệu được sử dụng là \textbf{Chess Pieces - v25 odsc-v1}, được xuất từ Roboflow vào ngày 14/03/2023. Nguồn gốc dữ liệu là bộ ảnh bàn cờ được chụp từ một góc nhìn cố định, camera đặt lệch bên trái bàn cờ. Mục tiêu của bài toán là phát hiện vị trí từng quân cờ trong ảnh và phân loại quân cờ theo màu/loại quân.
+
+Theo mô tả gốc, dữ liệu được phát hành với giấy phép Public Domain. Dữ liệu phù hợp cho bài thực hành vì có đầy đủ bounding box, nhiều đối tượng trong cùng một ảnh, có hiện tượng che khuất giữa các quân cờ, và có phân bố lớp không đều giống bài toán thực tế.
+
+Tiền xử lý đã được Roboflow áp dụng trước khi xuất dữ liệu:
+\begin{itemize}[leftmargin=1.2cm]
+    \item tự động xoay ảnh theo EXIF và loại bỏ metadata EXIF-orientation;
+    \item resize toàn bộ ảnh về $416 \times 416$ theo kiểu stretch;
+    \item tăng cường dữ liệu thành 3 phiên bản từ mỗi ảnh gốc;
+    \item random crop trong khoảng 0--10\%;
+    \item random brightness trong khoảng -15\% đến +15\%.
+\end{itemize}
+
+Dữ liệu trong thư mục \texttt{416x416\_aug\_chess\_pieces} có ba split: \texttt{train}, \texttt{valid}, \texttt{test}. Mỗi split gồm ảnh \texttt{.jpg}, file \texttt{\_classes.txt} và file \texttt{\_annotations.txt}. Annotation gốc có dạng:
+
+\texttt{image.jpg x1,y1,x2,y2,class\_id x1,y1,x2,y2,class\_id ...}
+
+Trong đó \texttt{x1,y1} là góc trái trên, \texttt{x2,y2} là góc phải dưới của bounding box theo tọa độ pixel tuyệt đối. Dữ liệu có 13 nhãn trong file lớp được cung cấp: \texttt{bishop}, \texttt{black-bishop}, \texttt{black-king}, \texttt{black-knight}, \texttt{black-pawn}, \texttt{black-queen}, \texttt{black-rook}, \texttt{white-bishop}, \texttt{white-king}, \texttt{white-knight}, \texttt{white-pawn}, \texttt{white-queen}, \texttt{white-rook}.
+
+Tổng số ảnh là 693, tổng số bounding box là 7.086. Mỗi ảnh trong ba split đều có annotation. Phân bố theo split:
+
+\begin{longtable}{lrrr}
+\toprule
+\textbf{Split} & \textbf{Số ảnh} & \textbf{Ảnh có nhãn} & \textbf{Số bounding box} \\
+\midrule
+Train & 606 & 606 & 6.324 \\
+Validation & 58 & 58 & 386 \\
+Test & 29 & 29 & 376 \\
+\bottomrule
+\end{longtable}
+
+Phân bố số bounding box theo lớp trên toàn bộ dataset:
+
+\begin{longtable}{lrrr r}
+\toprule
+\textbf{Lớp} & \textbf{Train} & \textbf{Valid} & \textbf{Test} & \textbf{Tổng} \\
+\midrule
+bishop & 3 & 0 & 0 & 3 \\
+black-bishop & 291 & 22 & 21 & 334 \\
+black-king & 303 & 29 & 17 & 349 \\
+black-knight & 423 & 30 & 25 & 478 \\
+black-pawn & 1.488 & 77 & 86 & 1.651 \\
+black-queen & 186 & 11 & 14 & 211 \\
+black-rook & 441 & 28 & 26 & 495 \\
+white-bishop & 375 & 22 & 25 & 422 \\
+white-king & 315 & 29 & 15 & 359 \\
+white-knight & 420 & 19 & 25 & 464 \\
+white-pawn & 1.422 & 77 & 88 & 1.587 \\
+white-queen & 243 & 16 & 14 & 273 \\
+white-rook & 414 & 26 & 20 & 460 \\
+\bottomrule
+\end{longtable}
+
+Nhận xét về dữ liệu: hai lớp pawn chiếm tỷ lệ lớn nhất vì mỗi ván cờ có nhiều tốt. Một lớp \texttt{bishop} tổng quát chỉ có 3 box và không xuất hiện ở validation/test, do đó khi đánh giá cần chú ý kết quả từng lớp, tránh chỉ dựa vào mAP trung bình. Các lớp quân có màu trắng/đen được tách riêng nên mô hình phải học đồng thời hình dạng quân và màu sắc/độ sáng trong ảnh.
+
+\subsection{Liên kết tải}
+
+\begin{enumerate}[leftmargin=1.2cm]
+    \item Liên kết gốc Roboflow Universe: \url{https://universe.roboflow.com/joseph-nelson/chess-pieces-new}
+    \item Liên kết reup Google Drive/OneDrive của nhóm: \url{https://drive.google.com/drive/folders/REPLACE_WITH_GROUP_REUPLOAD_LINK}
+\end{enumerate}
+
+Ghi chú: liên kết thứ hai cần được thay bằng thư mục Google Drive/OneDrive sau khi nhóm nén và tải lại bộ dữ liệu.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.75\textwidth]{figures/sample_ground_truth.png}
+    \caption{Ví dụ ảnh huấn luyện với bounding box gốc.}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.78\textwidth]{figures/split_distribution.png}
+    \caption{Phân bố số ảnh và số bounding box theo split.}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.92\textwidth]{figures/class_distribution.png}
+    \caption{Phân bố số bounding box theo lớp.}
+\end{figure}
+
+\section{Tiền xử lý}
+
+Mã nguồn chuyển dữ liệu sang hai định dạng:
+\begin{itemize}[leftmargin=1.2cm]
+    \item YOLO: mỗi ảnh có file \texttt{.txt} gồm \texttt{class cx cy w h} đã chuẩn hóa theo kích thước ảnh;
+    \item COCO JSON: mỗi bounding box được lưu theo dạng \texttt{x, y, width, height}, dùng cho DETR và Faster R-CNN.
+\end{itemize}
+
+Lệnh tái tạo:
+\begin{verbatim}
+cd source
+python th03_object_detection.py prepare
+python th03_object_detection.py figures
+\end{verbatim}
+
+\section{Mô hình và cách thực nghiệm}
+
+\subsection{YOLO}
+
+Phần YOLO sử dụng Ultralytics YOLOv8n pretrained. Đây là phiên bản YOLO cao hơn YOLOv4, phù hợp với ghi chú cho phép sử dụng các bản YOLO mới. Mô hình được fine-tune trên tập train, chọn validation để theo dõi, và đánh giá trên test.
+
+\begin{verbatim}
+python th03_object_detection.py yolo --epochs 50 --batch-size 8
+\end{verbatim}
+
+\subsection{DETR}
+
+DETR sử dụng checkpoint \texttt{facebook/detr-resnet-50}. Lớp phát hiện cuối được thay bằng số lớp của dataset. Dữ liệu được đưa vào theo chuẩn COCO thông qua \texttt{DetrImageProcessor}. Mô hình phù hợp để so sánh với YOLO vì DETR không phụ thuộc anchor và không cần NMS thủ công.
+
+\begin{verbatim}
+python th03_object_detection.py detr --epochs 20 --batch-size 2
+\end{verbatim}
+
+\subsection{Faster R-CNN}
+
+Mô hình thứ ba là Faster R-CNN ResNet-50 FPN pretrained từ TorchVision. Đây là mô hình hai giai đoạn: trước hết sinh region proposals, sau đó phân loại và tinh chỉnh bounding box. Mô hình này thường chậm hơn YOLO nhưng ổn định với tập dữ liệu nhỏ.
+
+\begin{verbatim}
+python th03_object_detection.py fasterrcnn --epochs 20 --batch-size 2
+\end{verbatim}
+
+\section{So sánh với hàm thư viện}
+
+Trong yêu cầu tham khảo YOLOv4, phần tự cài đặt gồm giải mã output, lọc confidence, NMS và vẽ bounding box. Trong bài này, mã nguồn vẫn giữ các phần xử lý dữ liệu và pipeline huấn luyện rõ ràng, còn phần mô hình sử dụng repo/thư viện chính thức theo ghi chú của giảng viên:
+\begin{itemize}[leftmargin=1.2cm]
+    \item YOLO dùng API thư viện Ultralytics để huấn luyện và suy luận;
+    \item DETR dùng API Hugging Face Transformers;
+    \item Faster R-CNN dùng API TorchVision.
+\end{itemize}
+
+Khi cần so sánh thủ công với thư viện, có thể dùng cùng một ảnh test, lấy danh sách boxes trước NMS, sau đó so sánh kết quả NMS tự viết với \texttt{cv2.dnn.NMSBoxes} hoặc NMS nội bộ của Ultralytics.
+
+\section{Kết quả thực nghiệm}
+
+Do môi trường cục bộ dùng để chuẩn bị báo cáo chưa có PyTorch và chưa xác nhận GPU, nhóm chưa chạy fine-tune dài trong môi trường này. Bảng dưới là mẫu cần điền sau khi chạy các lệnh huấn luyện trên Colab/GPU. Các hình minh chứng dữ liệu ở trên đã được sinh trực tiếp từ dataset.
+
+\begin{longtable}{p{0.24\textwidth}p{0.18\textwidth}p{0.18\textwidth}p{0.30\textwidth}}
+\toprule
+\textbf{Mô hình} & \textbf{mAP50 test} & \textbf{Thời gian/ảnh} & \textbf{Nhận xét} \\
+\midrule
+YOLOv8n & Cần chạy GPU & Cần chạy GPU & Dự kiến nhanh nhất, phù hợp realtime. \\
+DETR ResNet-50 & Cần chạy GPU & Cần chạy GPU & Dễ bỏ sót vật nhỏ nếu train ít epoch. \\
+Faster R-CNN ResNet-50 FPN & Cần chạy GPU & Cần chạy GPU & Thường chậm hơn YOLO, ổn định với dữ liệu nhỏ. \\
+\bottomrule
+\end{longtable}
+
+\section{Phân tích}
+
+YOLO phù hợp nhất nếu ưu tiên tốc độ vì mô hình dự đoán trực tiếp bounding box và class trên lưới đặc trưng. Với ảnh $416 \times 416$, YOLO thường cho tốc độ suy luận tốt và dễ triển khai.
+
+DETR có kiến trúc hiện đại hơn, dùng object queries và Transformer decoder để dự đoán tập object. Ưu điểm là pipeline đơn giản về mặt hậu xử lý, nhưng mô hình thường cần nhiều dữ liệu hoặc nhiều epoch hơn để hội tụ tốt so với YOLO trên dataset nhỏ.
+
+Faster R-CNN là baseline mạnh cho object detection truyền thống. Vì có bước đề xuất vùng, mô hình có thể cho bounding box chính xác nhưng tốc độ suy luận thường thấp hơn YOLO.
+
+Dataset có mất cân bằng lớp rõ rệt: hai lớp pawn chiếm nhiều box nhất, trong khi lớp \texttt{bishop} chỉ có 3 box ở train và không xuất hiện ở validation/test. Khi đánh giá, cần xem thêm kết quả từng lớp thay vì chỉ nhìn mAP trung bình.
+
+\section{Phân công và tự đánh giá}
+
+\begin{longtable}{p{0.28\textwidth}p{0.20\textwidth}p{0.44\textwidth}}
+\toprule
+\textbf{Thành viên} & \textbf{Đóng góp} & \textbf{Nội dung} \\
+\midrule
+25C11067 - Nguyễn Thái Thông & 50\% & Chuẩn bị dataset, kiểm tra định dạng nhãn, chạy/ghi nhận kết quả YOLO. \\
+25C11035 - Trần Hạ Khánh Duy & 50\% & Cài đặt DETR, Faster R-CNN, sinh hình minh chứng, tổng hợp báo cáo. \\
+\bottomrule
+\end{longtable}
+
+\section{Kết luận}
+
+Bài thực hành đã chuẩn bị pipeline đầy đủ cho phát hiện quân cờ bằng YOLO, DETR và Faster R-CNN. Dataset được mô tả rõ, có mã chuyển định dạng sang YOLO/COCO, có hình minh chứng và có script huấn luyện tái lập. Việc còn lại trước khi nộp là chạy fine-tune trên GPU để điền bảng kết quả cuối cùng và thay liên kết reup Google Drive/OneDrive của nhóm.
+
+\end{document}
