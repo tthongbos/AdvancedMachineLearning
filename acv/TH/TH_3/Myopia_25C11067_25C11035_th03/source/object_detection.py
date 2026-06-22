@@ -315,7 +315,7 @@ def save_prediction_image(
     labels: list[str],
     scores: list[float],
     output_path: Path,
-    min_score: float = 0.60,
+    min_score: float = 0.30,
 ) -> None:
     # Lưu image.
     image = cv2.imread(str(image_path))
@@ -325,7 +325,7 @@ def save_prediction_image(
         raise FileNotFoundError(f"Cannot read image: {image_path}")
     # Lưu canvas.
     canvas = image.copy()
-    # Vẽ tất cả bbox còn lại sau khi đã cắt ngưỡng confidence.
+    # Chỉ lọc theo confidence, còn NMS để model tự xử lý ở bước inference.
     for box, label, score in zip(boxes, labels, scores):
         if float(score) < min_score:
             continue
@@ -818,7 +818,7 @@ def save_prediction_sweep(
     predict_fn,
     output_dir: Path,
     prefix: str,
-    min_score: float = 0.60,
+    min_score: float = 0.30,
 ) -> list[Path]:
     # Tạo thư mục nếu chưa có.
     output_dir.mkdir(parents=True, exist_ok=True)
@@ -1218,7 +1218,7 @@ def predict_yolo_boxes(model, image_path: Path) -> tuple[np.ndarray, list[str], 
     # Dự đoán bbox bằng mô hình YOLO đã fine-tune.
 
     # Lưu result.
-    result = model.predict(source=str(image_path), conf=0.60, verbose=False)[0]
+    result = model.predict(source=str(image_path), conf=0.30, verbose=False)[0]
     # Lưu boxes.
     boxes = result.boxes.xyxy.detach().cpu().numpy() if len(result.boxes) else np.zeros((0, 4), dtype=np.float32)
     # Lưu label_ids.
@@ -1238,7 +1238,7 @@ def predict_torchvision_boxes(
     model,
     image_path: Path,
     classes: list[str],
-    score_threshold: float = 0.60,
+    score_threshold: float = 0.30,
 ) -> tuple[np.ndarray, list[str], list[float]]:
     # Dự đoán bbox bằng detector của TorchVision.
 
@@ -1274,7 +1274,7 @@ def predict_torchvision_boxes(
 
 
 # Định nghĩa predict_detr_boxes.
-def predict_detr_boxes(model, processor, image_path: Path, score_threshold: float = 0.60) -> tuple[np.ndarray, list[str], list[float]]:
+def predict_detr_boxes(model, processor, image_path: Path, score_threshold: float = 0.30) -> tuple[np.ndarray, list[str], list[float]]:
     # Dự đoán bbox bằng DETR.
 
     # Lưu image.
@@ -1463,8 +1463,7 @@ def train_yolo(data_yaml: Path, epochs: int, imgsz: int, project: Path, figures_
         lambda image_path: predict_yolo_boxes(model, image_path),
         figures_dir,
         "yolo",
-        min_score=0.3,
-        max_boxes=8,
+        min_score=0.30,
     )
     # Dùng toàn bộ tập test để tính confusion matrix và metric curve.
     test_all = sorted((dataset_root / "test").glob("*.jpg"))
@@ -1562,8 +1561,7 @@ def train_faster_rcnn(dataset_root: Path, epochs: int, batch_size: int, output_d
         lambda image_path: predict_torchvision_boxes(model, image_path, classes),
         figures_dir,
         "faster_rcnn",
-        min_score=0.3,
-        max_boxes=8,
+        min_score=0.30,
     )
     # Dùng toàn bộ ảnh test để đánh giá định lượng.
     test_all = sorted((dataset_root / "test").glob("*.jpg"))
@@ -1694,13 +1692,17 @@ def train_detr(dataset_root: Path, epochs: int, batch_size: int, output_dir: Pat
         per_device_train_batch_size=batch_size,
         per_device_eval_batch_size=batch_size,
         num_train_epochs=epochs,
-        learning_rate=1e-4,
+        # DETR khá nhạy với mixed precision và learning rate lớn trên dataset nhỏ.
+        learning_rate=5e-5,
         weight_decay=1e-4,
+        warmup_ratio=0.1,
+        max_grad_norm=0.1,
         logging_steps=10,
         evaluation_strategy="epoch",
         save_strategy="epoch",
         remove_unused_columns=False,
-        fp16=device.type == "cuda",
+        # Train DETR ở FP32 để tránh NaN ở box regression khi chạy lâu.
+        fp16=False,
         no_cuda=device.type == "cpu",
         report_to=[],
     )
@@ -1724,8 +1726,7 @@ def train_detr(dataset_root: Path, epochs: int, batch_size: int, output_dir: Pat
         lambda image_path: predict_detr_boxes(model, processor, image_path),
         figures_dir,
         "detr",
-        min_score=0.3,
-        max_boxes=8,
+        min_score=0.30,
     )
     # Đánh giá trên toàn bộ test set.
     test_all = sorted((dataset_root / "test").glob("*.jpg"))
