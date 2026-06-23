@@ -1,9 +1,0 @@
-numpy==1.26.4
-opencv-python==4.8.1.78
-
-ultralytics==8.3.28
-transformers==4.46.3
-accelerate==1.0.1
-timm==1.0.11
-tqdm==4.67.1
-gdown==5.2.0
