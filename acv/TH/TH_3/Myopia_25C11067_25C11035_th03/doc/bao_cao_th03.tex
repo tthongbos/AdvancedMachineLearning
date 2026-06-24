@@ -43,7 +43,7 @@
     \vspace{2.0cm}
     {\Large\bfseries BÁO CÁO THỰC HÀNH 03\par}
     \vspace{0.4cm}
-    {\large\bfseries Phát hiện đối tượng trên ảnh bàn cờ bằng YOLO, DETR và Faster R-CNN\par}
+    {\large\bfseries Phát hiện đối tượng bằng YOLO, DETR và Faster R-CNN\par}
 
     \vspace{1.8cm}
     \begin{tabular}{>{\bfseries}l l}
@@ -60,14 +60,14 @@
 
 \section{Mục tiêu}
 
-Bài thực hành 03 tập trung vào bài toán phát hiện đối tượng (object detection) trên bộ dữ liệu ảnh bàn cờ có các quân cờ ở nhiều trạng thái sắp xếp khác nhau. Nhóm xây dựng một pipeline hoàn chỉnh gồm chuẩn hóa dữ liệu, huấn luyện ba mô hình phát hiện đối tượng, xuất ảnh dự đoán và đánh giá kết quả bằng các biểu đồ trực quan.
+Bài thực hành 03 tập trung vào bài toán phát hiện đối tượng (object detection) bằng YOLO, DETR và Faster R-CNN. Nhóm chọn trên bộ dữ liệu ảnh bàn cờ có các quân cờ ở nhiều trạng thái sắp xếp khác nhau và xây dựng một pipeline hoàn chỉnh gồm chuẩn hóa dữ liệu, huấn luyện ba mô hình phát hiện đối tượng, xuất ảnh dự đoán và đánh giá kết quả bằng các biểu đồ trực quan.
 
 Các mục tiêu chính của bài gồm:
 \begin{itemize}[leftmargin=1.2cm]
-    \item tìm hiểu cấu trúc dữ liệu nhãn cho bài toán detection và chuyển đổi giữa các định dạng annotation khác nhau;
-    \item cài đặt, huấn luyện và so sánh ba mô hình YOLO, DETR và Faster R-CNN trên cùng một bộ ảnh;
-    \item xuất ảnh prediction, confusion matrix và đường cong đánh giá để phục vụ báo cáo;
-    \item quan sát ảnh hưởng của dữ liệu mất cân bằng lớp, số lượng object trên ảnh và đặc điểm từng mô hình đến chất lượng dự đoán.
+    \item Tìm hiểu cấu trúc dữ liệu nhãn cho bài toán detection và chuyển đổi giữa các định dạng annotation khác nhau;
+    \item Cài đặt, huấn luyện và so sánh ba mô hình YOLO, DETR và Faster R-CNN trên cùng một bộ ảnh;
+    \item Xuất ảnh prediction, confusion matrix và đường cong đánh giá để phục vụ báo cáo;
+    \item Quan sát ảnh hưởng của dữ liệu mất cân bằng lớp, số lượng object trên ảnh và đặc điểm từng mô hình đến chất lượng dự đoán.
 \end{itemize}
 
 Bộ dữ liệu sử dụng trong thực nghiệm gồm 693 ảnh, chia thành 606 ảnh train, 58 ảnh validation và 29 ảnh test. Tổng số bounding box là 7{,}086. Dữ liệu có 13 lớp quân cờ, trong đó một số lớp xuất hiện rất ít như \texttt{bishop}, làm cho bài toán có tính mất cân bằng rõ rệt.
@@ -78,8 +78,8 @@ Bộ dữ liệu sử dụng trong thực nghiệm gồm 693 ảnh, chia thành 
 \toprule
 \textbf{Thành viên} & \textbf{Nội dung đóng góp} \\
 \midrule
-Nguyễn Thái Thông & Chuẩn bị notebook, triển khai pipeline tiền xử lý dữ liệu, huấn luyện YOLO và DETR, lưu các hình kết quả, hoàn thiện phần đánh giá. \\
-Trần Hạ Khánh Duy & Triển khai Faster R-CNN, kiểm tra định dạng annotation, đối chiếu kết quả dự đoán và hoàn thiện phần nhận xét báo cáo. \\
+Nguyễn Thái Thông & Chuẩn bị dataset, xây dựng pipeline tiền xử lý; triển khai và đánh giá YOLO; thực hiện trực quan hóa kết quả dự đoán; viết phần mô tả dữ liệu và phương pháp. \\
+Trần Hạ Khánh Duy & Kiểm tra annotation và chuyển đổi định dạng dữ liệu; triển khai và đánh giá DETR, Faster R-CNN; thực hiện so sánh thực nghiệm và viết phần kết quả, nhận xét, kết luận. \\
 \bottomrule
 \end{longtable}
 
@@ -98,7 +98,15 @@ Trần Hạ Khánh Duy & 100\% & Hoàn thành phần được phân công, phố
 
 \subsection{Tổng quan dữ liệu và tiền xử lý}
 
-Dữ liệu gốc được lưu theo ba split \texttt{train}, \texttt{valid} và \texttt{test}. Mỗi ảnh đi kèm các nhãn bounding box tuyệt đối theo dạng \texttt{x1,y1,x2,y2,class\_id}. Khi huấn luyện, nhóm chuyển dữ liệu sang các định dạng phù hợp với từng mô hình:
+Bộ dữ liệu được chọn là \textbf{Chess Pieces 416x416 Augmented} trên Roboflow Public Dataset, thuộc bài toán phát hiện quân cờ trên ảnh bàn cờ. Dataset gồm các ảnh kích thước 416$\times$416, đã được chia sẵn theo các split \texttt{train}, \texttt{valid} và \texttt{test}; mỗi ảnh có annotation bounding box cho các quân cờ như pawn, rook, bishop, knight, queen và king theo hai màu đen/trắng. Đây là tập dữ liệu phù hợp với bài thực hành vì ảnh có nền bàn cờ tương đối rõ, nhưng vẫn có các tình huống khó như quân cờ nhỏ, nằm sát biên ảnh, bị che khuất một phần hoặc nhiều quân xuất hiện dày đặc.
+
+Liên kết truy xuất và tải dữ liệu:
+\begin{itemize}[leftmargin=1.2cm]
+    \item Link gốc Roboflow: \href{https://public.roboflow.com/object-detection/chess-full/24/download}{Roboflow Chess Full v24 download}
+    \item Link reup Google Drive: \href{https://drive.google.com/file/d/1sww39WoPZ6ICktbJwbSsHTxOQyE7R5hH/view?usp=sharing}{Google Drive backup}
+\end{itemize}
+
+Dữ liệu sau khi tải được lưu theo ba split \texttt{train}, \texttt{valid} và \texttt{test}. Mỗi ảnh đi kèm các nhãn bounding box tuyệt đối theo dạng \texttt{x1,y1,x2,y2,class\_id}. Khi huấn luyện, nhóm chuyển dữ liệu sang các định dạng phù hợp với từng mô hình:
 \begin{itemize}[leftmargin=1.2cm]
     \item YOLO nhận nhãn theo định dạng chuẩn \texttt{class cx cy w h} và được sinh ra từ file \texttt{data.yaml};
     \item DETR sử dụng \texttt{DetrImageProcessor} để encode ảnh và annotation sang format mà Hugging Face mong đợi;
@@ -106,6 +114,36 @@ Dữ liệu gốc được lưu theo ba split \texttt{train}, \texttt{valid} và
 \end{itemize}
 
 Trên notebook, nhóm cũng xây dựng các hàm tiện ích để đọc ảnh, hiển thị ảnh, tạo grid minh họa và thống kê dữ liệu. Các hình thống kê cơ bản của bộ dữ liệu gồm ảnh mẫu, phân bố số lượng ảnh theo split và phân bố lớp quân cờ.
+
+Các ảnh mẫu trong bộ dữ liệu cho thấy quân cờ thường xuất hiện trên nền bàn cờ khá đều màu, nhưng có thể bị che khuất một phần, chồng lấn hoặc xuất hiện với nhiều góc nhìn khác nhau. Đây là lý do khiến bài toán detection trên ảnh bàn cờ không hoàn toàn đơn giản dù số lớp chỉ ở mức trung bình.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{figures/dataset_samples_grid.png}
+    \caption{Một số ảnh mẫu của bộ dữ liệu.}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.86\textwidth]{figures/sample_ground_truth.png}
+    \caption{Một ảnh ground truth tiêu biểu sau khi gắn bounding box.}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.78\textwidth]{figures/split_distribution.png}
+    \caption{Phân bố số ảnh và số bounding box theo từng split.}
+\end{figure}
+
+Biểu đồ split cho thấy tập train chiếm phần lớn dữ liệu với 606 ảnh và hơn 6{,}000 bounding box, trong khi validation có 58 ảnh và test có 29 ảnh. Số box ở validation và test chỉ ở mức vài trăm, vì vậy từng ảnh test có ảnh hưởng khá rõ đến confusion matrix và các nhận xét định lượng.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.86\textwidth]{figures/class_distribution.png}
+    \caption{Phân bố số bounding box theo lớp.}
+\end{figure}
+
+Từ biểu đồ phân bố lớp, có thể thấy dữ liệu bị lệch mạnh. Hai lớp pawn chiếm ưu thế rõ rệt: \texttt{black-pawn} khoảng 1{,}650 box và \texttt{white-pawn} khoảng 1{,}590 box. Các lớp còn lại chủ yếu nằm trong khoảng 200--500 box, ví dụ \texttt{black-queen} chỉ khoảng 200 box, còn lớp \texttt{bishop} không có box nào. Đây là nguyên nhân quan trọng khiến các mô hình học khó đồng đều trên toàn bộ lớp, đặc biệt với lớp hiếm hoặc lớp vắng mẫu.
 
 \subsection{YOLO}
 
@@ -129,10 +167,10 @@ Nhóm sử dụng backbone pretrain của TorchVision và thay đầu ra classif
 
 Sau khi huấn luyện, nhóm xuất ra bốn nhóm kết quả:
 \begin{itemize}[leftmargin=1.2cm]
-    \item biểu đồ train/eval loss hoặc metric curve;
-    \item confusion matrix trên tập test;
-    \item ảnh prediction mẫu cho 5 ảnh test đã chọn;
-    \item các panel so sánh giữa YOLO, DETR và Faster R-CNN trên cùng một bộ ảnh test.
+    \item Biểu đồ train/eval loss hoặc metric curve;
+    \item Confusion matrix trên tập test;
+    \item Ảnh prediction mẫu cho 5 ảnh test đã chọn;
+    \item Các panel so sánh giữa YOLO, DETR và Faster R-CNN trên cùng một bộ ảnh test.
 \end{itemize}
 
 Mục tiêu của phần đánh giá không chỉ là nhìn số liệu, mà còn quan sát trực quan xem mô hình nào giữ được nhiều quân cờ hơn, mô hình nào nhầm lớp, và mô hình nào phù hợp hơn với ảnh có ít object hoặc ảnh có quân cờ bị che khuất.
@@ -141,55 +179,45 @@ Mục tiêu của phần đánh giá không chỉ là nhìn số liệu, mà cò
 
 Quy trình thực nghiệm của bài được thực hiện theo các bước:
 \begin{enumerate}[leftmargin=1.2cm]
-    \item đọc file nhãn gốc và thống kê số lượng ảnh, số box, số lớp;
-    \item hiển thị một số ảnh mẫu và ảnh ground truth để kiểm tra chất lượng annotation;
-    \item huấn luyện YOLO, DETR và Faster R-CNN trên cùng bộ dữ liệu;
-    \item dùng cùng một tập test image để xuất prediction của ba mô hình;
-    \item lưu confusion matrix, evaluation curve và các ảnh so sánh trực quan;
-    \item tổng hợp nhận xét về ưu và nhược điểm của từng mô hình.
+    \item Đọc file nhãn gốc và thống kê số lượng ảnh, số box, số lớp;
+    \item Hiển thị một số ảnh mẫu và ảnh ground truth để kiểm tra chất lượng annotation;
+    \item Huấn luyện YOLO, DETR và Faster R-CNN trên cùng bộ dữ liệu;
+    \item Dùng cùng một tập test image để xuất prediction của ba mô hình;
+    \item Lưu confusion matrix, evaluation curve và các ảnh so sánh trực quan;
+    \item Tổng hợp nhận xét về ưu và nhược điểm của từng mô hình.
 \end{enumerate}
 
-Nhóm chọn 5 ảnh test tiêu biểu để so sánh giữa ba mô hình. Các ảnh này được lấy từ cùng một danh sách test image nhằm đảm bảo tính công bằng khi so sánh. Ngoài ra, hai ảnh khó nhất còn được tách riêng để tạo panel lỗi, giúp nhìn rõ hơn trường hợp nào mô hình dự đoán thiếu hoặc dự đoán nhầm lớp.
+Nhóm chọn 5 ảnh test tiêu biểu để so sánh giữa ba mô hình. Các ảnh này được lấy từ cùng một danh sách test image nhằm đảm bảo tính công bằng khi so sánh. Ngoài ra, hai ảnh khó nhất còn được tách riêng để tạo ảnh so sánh lỗi, giúp nhìn rõ hơn trường hợp nào mô hình dự đoán thiếu hoặc dự đoán nhầm lớp.
+
+Link minh chứng thực nghiệm trên Kaggle: \href{https://www.kaggle.com/code/duytranhakhanh/acv-th03-object-detection-chess-pieces?scriptVersionId=329828191}{ACV TH03 Object Detection Chess Pieces}.
 
 \section{Kết quả và nhận xét}
 
-\subsection{Tổng quan bộ dữ liệu}
-
-Các ảnh mẫu trong bộ dữ liệu cho thấy quân cờ thường xuất hiện trên nền bàn cờ khá đều màu, nhưng có thể bị che khuất một phần, chồng lấn hoặc xuất hiện với nhiều góc nhìn khác nhau. Đây là lý do khiến bài toán detection trên ảnh bàn cờ không hoàn toàn đơn giản dù số lớp chỉ ở mức trung bình.
-
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=\textwidth]{figures/dataset_samples_grid.png}
-    \caption{Một số ảnh mẫu của bộ dữ liệu.}
-\end{figure}
-
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.86\textwidth]{figures/sample_ground_truth.png}
-    \caption{Một ảnh ground truth tiêu biểu sau khi gắn bounding box.}
-\end{figure}
-
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.78\textwidth]{figures/split_distribution.png}
-    \caption{Phân bố số ảnh và số bounding box theo từng split.}
-\end{figure}
-
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.86\textwidth]{figures/class_distribution.png}
-    \caption{Phân bố số bounding box theo lớp.}
-\end{figure}
-
-Từ biểu đồ phân bố lớp, có thể thấy dữ liệu bị lệch mạnh: một số lớp như \texttt{black-pawn} và \texttt{white-pawn} xuất hiện rất nhiều, trong khi \texttt{bishop} gần như không có mẫu. Đây là nguyên nhân quan trọng khiến các mô hình học khó đồng đều trên toàn bộ lớp, đặc biệt với lớp hiếm.
-
-\subsection{So sánh trực quan giữa ba mô hình}
+\subsection{Kết quả huấn luyện và đánh giá mô hình}
 
 Toàn bộ đánh giá định lượng trong bài đều được tính trên cùng tập \texttt{test}. Confusion matrix, đường cong đánh giá và các ảnh prediction đều dùng chung bộ test image, cùng ngưỡng confidence trong quá trình hiển thị, nên có thể so sánh trực tiếp giữa ba mô hình.
 
+\subsubsection{Diễn biến huấn luyện}
+
+Đường cong huấn luyện của YOLO cho thấy mô hình hội tụ rõ sau 20 epoch được lưu trong biểu đồ: \texttt{train/box\_loss} giảm từ khoảng 1.7 xuống 0.79, \texttt{train/cls\_loss} giảm từ hơn 4.0 xuống khoảng 0.65, còn \texttt{val/cls\_loss} giảm mạnh từ khoảng 3.7 xuống gần 0.53. Các metric validation tăng tương ứng: precision và recall tiến gần 0.97--0.98, \texttt{mAP50} đạt xấp xỉ 0.98, còn \texttt{mAP50-95} đạt khoảng 0.78 ở cuối quá trình train.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{figures/yolo_training_curve.png}
+    \caption{Đường cong huấn luyện và validation của YOLO.}
+\end{figure}
+
+Với DETR, train loss giảm từ khoảng 3.5 ở giai đoạn đầu xuống dưới 0.5 ở cuối quá trình fine-tune. Eval loss cũng giảm từ khoảng 1.4 xuống gần 0.4 trong các lần đánh giá đầu, cho thấy mô hình học được biểu diễn phù hợp hơn với tập cờ vua. Tuy nhiên, đường train loss dao động nhiều hơn YOLO, phản ánh đặc trưng của quá trình fine-tune transformer trên tập dữ liệu nhỏ.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.86\textwidth]{figures/detr_training_curve.png}
+    \caption{Đường cong huấn luyện của DETR.}
+\end{figure}
+
 \subsubsection{Confusion matrix}
 
-Ở bảng confusion matrix, YOLO giữ được xu hướng đường chéo khá rõ và ít ô nền hơn hai mô hình còn lại. DETR có xu hướng thận trọng hơn, dẫn đến một số lớp bị bỏ sót và xuất hiện nhiều dự đoán đi vào cột nền. Faster R-CNN có độ phủ tốt, nhưng trong một vài lớp gần nhau vẫn có nhầm lẫn nhẹ.
+Ở bảng confusion matrix, cả ba mô hình đều giữ được xu hướng đường chéo rõ. YOLO dự đoán đúng 86 mẫu \texttt{black-pawn}, 87 mẫu \texttt{white-pawn}, 26 mẫu \texttt{black-rook} và 25 mẫu \texttt{white-bishop}/\texttt{white-knight}. Các lỗi của YOLO chủ yếu là các ô nhỏ ngoài đường chéo, ví dụ một số box nền bị dự đoán thành \texttt{black-pawn}, \texttt{white-bishop}, \texttt{white-rook} hoặc một vài nhầm lẫn giữa các quân cùng màu.
 
 \begin{figure}[H]
     \centering
@@ -211,125 +239,55 @@ Toàn bộ đánh giá định lượng trong bài đều được tính trên c
     \caption{So sánh confusion matrix của ba mô hình trên cùng tập test.}
 \end{figure}
 
-Trong ba mô hình, YOLO và Faster R-CNN cho số lượng dự đoán đúng khá ổn định ở các lớp phổ biến như \texttt{black-pawn} và \texttt{white-pawn}. DETR vẫn nhận ra được cấu trúc chung nhưng thiên về dự đoán ít box hơn, đặc biệt ở các ảnh ít object hoặc object nhỏ.
+DETR cũng nhận tốt hai lớp pawn với 85 mẫu \texttt{black-pawn} và 88 mẫu \texttt{white-pawn} đúng, nhưng có nhiều ô nền hơn ở hàng/cột \texttt{background}, ví dụ nền bị gán thành \texttt{white-pawn} 8 lần và thành \texttt{black-queen} 5 lần. Faster R-CNN là confusion matrix sạch nhất trong ba mô hình: \texttt{black-pawn} đúng 86, \texttt{white-pawn} đúng 88, \texttt{black-rook} đúng 26 và \texttt{white-rook} đúng 20; số lỗi ngoài đường chéo rất ít, nổi bật nhất là 2 mẫu \texttt{black-knight} bị gán sang \texttt{black-rook}.
 
 \subsubsection{Prediction theo cùng ảnh test}
 
-Nhóm dùng cùng 5 ảnh test tiêu biểu để nhìn prediction của cả ba mô hình theo từng case. Cách trình bày này giúp nhận ra rất rõ sự khác nhau giữa các model trong cùng điều kiện đầu vào.
+Nhóm dùng cùng 5 ảnh test tiêu biểu để nhìn prediction của cả ba mô hình theo từng case. Các panel dưới đây lần lượt hiển thị ảnh gốc, YOLO, DETR và mô hình thứ ba là Faster R-CNN. Cách trình bày này giúp nhận ra rất rõ sự khác nhau giữa các model trong cùng điều kiện đầu vào.
 
-Case 1 là ảnh gần như trống, nên cả ba mô hình đều không tạo ra prediction đáng kể. Đây là case hợp lý để kiểm tra xu hướng false positive của model.
+Case 1 là ảnh gần như trống. Faster R-CNN không tạo box nào, trong khi YOLO và DETR vẫn có false positive nhỏ ở mép trên bàn cờ: YOLO gán \texttt{white-bishop} với confidence 0.44, còn DETR gán \texttt{white-pawn} với confidence 0.63. Đây là case cho thấy ngưỡng confidence và vật thể bị cắt ở biên ảnh có thể tạo ra dự đoán nhiễu.
 
 \begin{figure}[H]
     \centering
-    \begin{minipage}[t]{0.32\textwidth}
-        \centering
-        \includegraphics[width=\textwidth]{figures/yolo_prediction_1.png}
-        \small YOLO
-    \end{minipage}\hfill
-    \begin{minipage}[t]{0.32\textwidth}
-        \centering
-        \includegraphics[width=\textwidth]{figures/detr_prediction_1.png}
-        \small DETR
-    \end{minipage}\hfill
-    \begin{minipage}[t]{0.32\textwidth}
-        \centering
-        \includegraphics[width=\textwidth]{figures/faster_rcnn_prediction_1.png}
-        \small Faster R-CNN
-    \end{minipage}
+    \includegraphics[width=\textwidth]{figures/comparison_case_1.png}
     \caption{So sánh prediction trên test case 1.}
 \end{figure}
 
-Case 2 có một quân đen ở giữa bàn cờ. Cả ba mô hình đều bắt được object chính, trong đó YOLO và Faster R-CNN cho bounding box gọn và rõ, còn DETR cũng đúng nhưng thường ít box phụ hơn.
+Case 2 có một quân đen ở giữa bàn cờ. Cả ba mô hình đều bắt đúng vị trí object, nhưng khác nhau ở phân lớp và độ tự tin: YOLO dự đoán \texttt{black-queen} với confidence 0.37, Faster R-CNN cũng dự đoán \texttt{black-queen} nhưng rất chắc với confidence 0.99, còn DETR gán nhầm sang \texttt{black-king} với confidence 0.50.
 
 \begin{figure}[H]
     \centering
-    \begin{minipage}[t]{0.32\textwidth}
-        \centering
-        \includegraphics[width=\textwidth]{figures/yolo_prediction_2.png}
-        \small YOLO
-    \end{minipage}\hfill
-    \begin{minipage}[t]{0.32\textwidth}
-        \centering
-        \includegraphics[width=\textwidth]{figures/detr_prediction_2.png}
-        \small DETR
-    \end{minipage}\hfill
-    \begin{minipage}[t]{0.32\textwidth}
-        \centering
-        \includegraphics[width=\textwidth]{figures/faster_rcnn_prediction_2.png}
-        \small Faster R-CNN
-    \end{minipage}
+    \includegraphics[width=\textwidth]{figures/comparison_case_2.png}
     \caption{So sánh prediction trên test case 2.}
 \end{figure}
 
-Case 3 có một quân trắng sát mép trên. YOLO và Faster R-CNN vẫn giữ được prediction đúng, còn DETR dự đoán được nhưng thường gọn hơn, thể hiện đúng tính thận trọng của mô hình.
+Case 3 có một quân trắng sát mép trên. YOLO và Faster R-CNN đều phát hiện đúng \texttt{white-bishop}, lần lượt với confidence khoảng 0.88 và 0.99. DETR không tạo prediction nào ở case này, cho thấy mô hình dễ bỏ sót object nhỏ hoặc object nằm sát biên ảnh hơn hai mô hình còn lại.
 
 \begin{figure}[H]
     \centering
-    \begin{minipage}[t]{0.32\textwidth}
-        \centering
-        \includegraphics[width=\textwidth]{figures/yolo_prediction_3.png}
-        \small YOLO
-    \end{minipage}\hfill
-    \begin{minipage}[t]{0.32\textwidth}
-        \centering
-        \includegraphics[width=\textwidth]{figures/detr_prediction_3.png}
-        \small DETR
-    \end{minipage}\hfill
-    \begin{minipage}[t]{0.32\textwidth}
-        \centering
-        \includegraphics[width=\textwidth]{figures/faster_rcnn_prediction_3.png}
-        \small Faster R-CNN
-    \end{minipage}
+    \includegraphics[width=\textwidth]{figures/comparison_case_3.png}
     \caption{So sánh prediction trên test case 3.}
 \end{figure}
 
-Case 4 là ảnh khó hơn, có nhiều quân cùng xuất hiện. Ở case này, YOLO vẫn giữ được khá nhiều detection, DETR có xu hướng rơi vào tình trạng dự đoán dày nhưng không đều bằng YOLO, còn Faster R-CNN khá mạnh ở việc giữ box của các quân chính.
+Case 4 là một quân trắng đứng sát mép trên, ground truth tương ứng với \texttt{white-rook}. Faster R-CNN phát hiện đúng \texttt{white-rook} với confidence 1.00. YOLO bắt đúng vùng object nhưng nhãn hiển thị bị chồng, cho thấy mô hình còn phân vân giữa các lớp quân trắng có hình dạng gần nhau. DETR tiếp tục bỏ sót object trong case này.
 
 \begin{figure}[H]
     \centering
-    \begin{minipage}[t]{0.32\textwidth}
-        \centering
-        \includegraphics[width=\textwidth]{figures/yolo_prediction_4.png}
-        \small YOLO
-    \end{minipage}\hfill
-    \begin{minipage}[t]{0.32\textwidth}
-        \centering
-        \includegraphics[width=\textwidth]{figures/detr_prediction_4.png}
-        \small DETR
-    \end{minipage}\hfill
-    \begin{minipage}[t]{0.32\textwidth}
-        \centering
-        \includegraphics[width=\textwidth]{figures/faster_rcnn_prediction_4.png}
-        \small Faster R-CNN
-    \end{minipage}
+    \includegraphics[width=\textwidth]{figures/comparison_case_4.png}
     \caption{So sánh prediction trên test case 4.}
 \end{figure}
 
-Case 5 là một ảnh mà quân cờ nổi bật hơn. Cả ba mô hình đều bắt được object chính, nhưng YOLO và Faster R-CNN cho prediction rõ ràng và dễ đọc hơn. DETR vẫn phát hiện đúng quân chính nhưng nhìn chung ít box hơn và ít nhiễu hơn.
+Case 5 là ảnh khó nhất trong nhóm so sánh, có rất nhiều quân cờ, nhiều quân sát nhau và nhiều nhãn bị chồng lên nhau khi vẽ. Cả ba mô hình đều phát hiện được phần lớn object chính. Faster R-CNN cho confidence rất cao ở nhiều box, thường đạt 0.99--1.00; DETR cũng giữ được nhiều box với confidence cao, ví dụ nhiều dự đoán pawn/rook nằm quanh 0.98--0.99; YOLO phát hiện dày nhưng có nhiều nhãn khó đọc hơn và một số confidence thấp hơn, khoảng 0.60--0.90 tùy quân.
 
 \begin{figure}[H]
     \centering
-    \begin{minipage}[t]{0.32\textwidth}
-        \centering
-        \includegraphics[width=\textwidth]{figures/yolo_prediction_5.png}
-        \small YOLO
-    \end{minipage}\hfill
-    \begin{minipage}[t]{0.32\textwidth}
-        \centering
-        \includegraphics[width=\textwidth]{figures/detr_prediction_5.png}
-        \small DETR
-    \end{minipage}\hfill
-    \begin{minipage}[t]{0.32\textwidth}
-        \centering
-        \includegraphics[width=\textwidth]{figures/faster_rcnn_prediction_5.png}
-        \small Faster R-CNN
-    \end{minipage}
+    \includegraphics[width=\textwidth]{figures/comparison_case_5.png}
     \caption{So sánh prediction trên test case 5.}
 \end{figure}
 
 \subsubsection{Đường cong đánh giá}
 
-Ba đường cong dưới đây được tính trên cùng tập test và cùng dải confidence threshold, nên có thể dùng để so sánh trực tiếp. YOLO thường cho vùng cân bằng tốt hơn giữa precision và recall. Faster R-CNN có đường cong khá ổn định. DETR nhạy hơn với ngưỡng confidence và thiên về dự đoán ít box hơn, nên recall thường thấp hơn hai mô hình còn lại trong cấu hình hiện tại.
+Ba đường cong dưới đây được tính trên cùng tập test và cùng dải confidence threshold, nên có thể dùng để so sánh trực tiếp. YOLO giữ precision rất cao, gần 0.97--0.99 trên phần lớn dải ngưỡng; recall gần 1.0 ở ngưỡng thấp nhưng giảm mạnh khi threshold vượt khoảng 0.75, xuống gần 0.1 ở ngưỡng cao nhất. DETR cân bằng hơn YOLO ở cuối dải: precision tăng từ khoảng 0.93 lên gần 0.98, recall giảm dần từ gần 0.99 xuống khoảng 0.55. Faster R-CNN ổn định nhất, precision nằm quanh 0.982--0.987, recall gần 1.0 trên phần lớn dải và chỉ giảm nhẹ ở ngưỡng rất cao.
 
 \begin{figure}[H]
     \centering
@@ -351,13 +309,31 @@ Ba đường cong dưới đây được tính trên cùng tập test và cùng 
     \caption{So sánh đường cong đánh giá của ba mô hình trên cùng tập test.}
 \end{figure}
 
+\subsubsection{Failure case}
+
+Hai panel lỗi giúp nhìn rõ hơn các tình huống gây nhầm hoặc bỏ sót. Ở failure case 1, ground truth là \texttt{white-rook}. Faster R-CNN dự đoán đúng \texttt{white-rook} với confidence 1.00, DETR bỏ sót hoàn toàn, còn YOLO bắt đúng vị trí nhưng nhãn bị chồng và có dấu hiệu nhầm sang lớp quân trắng khác. Điều này cho thấy object sát mép ảnh là điểm yếu rõ của DETR trong cấu hình hiện tại.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{figures/failure_case_1.png}
+    \caption{Failure case 1: ảnh một quân trắng sát mép trên.}
+\end{figure}
+
+Ở failure case 2, ảnh có nhiều quân cờ và các box nằm sát nhau. Ground truth dày đặc khiến chữ và box chồng lên nhau, nhưng vẫn thấy cả ba mô hình đều phát hiện được đa số quân. Khác biệt chính nằm ở độ sạch của nhãn: Faster R-CNN có nhiều confidence 0.99--1.00 và box khá sát object, DETR cũng giữ nhiều box với confidence cao nhưng vẫn có nhầm lớp nhỏ, còn YOLO phủ được nhiều quân nhưng nhãn dày hơn và một số dự đoán có confidence thấp hơn. Đây là tình huống thể hiện rõ ảnh hưởng của occlusion, mật độ quân cao và sự giống nhau về hình dạng giữa các lớp.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{figures/failure_case_2.png}
+    \caption{Failure case 2: ảnh nhiều quân cờ, nhiều box sát nhau.}
+\end{figure}
+
 \subsubsection{Tổng hợp nhận xét}
 
 Từ toàn bộ các hình so sánh, có thể rút ra ba điểm chính:
 \begin{itemize}[leftmargin=1.2cm]
-    \item YOLO là mô hình cân bằng nhất giữa tốc độ, độ phủ detection và tính dễ đọc của kết quả.
-    \item DETR cho kết quả sạch nhưng thận trọng hơn, đặc biệt trên ảnh ít object hoặc object nhỏ, nên dễ có cảm giác "dự đoán ít".
-    \item Faster R-CNN là baseline ổn định, thể hiện tốt trên các ảnh có nhiều quân cờ và giữ box khá đều.
+    \item YOLO học nhanh và có metric huấn luyện tốt, nhưng trong ảnh test cụ thể vẫn có false positive ở biên ảnh và một số confidence thấp, ví dụ case 2 chỉ đạt 0.37.
+    \item DETR phát hiện được nhiều object ở ảnh dày đặc, nhưng dễ bỏ sót object đơn lẻ sát mép ảnh như case 3 và case 4; ngoài ra có nhầm lớp \texttt{black-queen}/\texttt{black-king} ở case 2.
+    \item Faster R-CNN là mô hình ổn định nhất trong các hình hiện tại: confusion matrix sạch, đường cong đánh giá cao và các prediction mẫu thường có confidence 0.99--1.00.
 \end{itemize}
 
 Vì bài toán có phân bố lớp lệch, các lớp hiếm vẫn là điểm yếu chung của cả ba mô hình. Do đó, nhận xét chính của báo cáo không chỉ nằm ở số lượng box đúng, mà còn ở độ ổn định và khả năng giữ object trong các tình huống khó.
@@ -368,19 +344,19 @@ Vì bài toán có phân bố lớp lệch, các lớp hiếm vẫn là điểm 
 \toprule
 \textbf{Mô hình} & \textbf{Đặc điểm nổi bật} & \textbf{Nhận xét} \\
 \midrule
-YOLO & One-stage, nhanh, trực quan & Phù hợp nhất cho bài toán cần tốc độ và ảnh prediction dễ đọc. Kết quả khá ổn trên quân cờ phổ biến. \\
-DETR & Transformer, set prediction & Hiện đại và sạch về mặt pipeline, nhưng nhạy với cấu hình train và dữ liệu nhỏ. Cần cấu hình cẩn thận để ổn định. \\
-Faster R-CNN & Two-stage, ổn định & Cho kết quả cân bằng, dễ kiểm soát, phù hợp làm baseline mạnh trong báo cáo học thuật. \\
+YOLO & One-stage, nhanh, trực quan & Hội tụ nhanh và có metric validation cao. Tuy nhiên ở các ảnh test cụ thể vẫn xuất hiện false positive sát biên và một số dự đoán confidence thấp. \\
+DETR & Transformer, set prediction & Pipeline hiện đại, phát hiện được nhiều quân trong ảnh đông object, nhưng nhạy với object nhỏ hoặc sát mép ảnh; có trường hợp bỏ sót hoàn toàn. \\
+Faster R-CNN & Two-stage, ổn định & Ổn định nhất trong bộ hình hiện tại: confusion matrix sạch, confidence cao ở nhiều case và ít false positive hơn trên ảnh gần trống. \\
 \bottomrule
 \end{longtable}
 
-Nhìn chung, YOLO là mô hình có tính thực dụng cao nhất trong bài này. Faster R-CNN cho chất lượng ổn định, còn DETR thể hiện đúng tinh thần của một mô hình transformer hiện đại nhưng đòi hỏi điều chỉnh hyperparameter cẩn thận hơn. Trên bộ dữ liệu có phân bố lớp lệch như bài toán cờ vua, các lớp hiếm vẫn là điểm khó chung của cả ba mô hình.
+Nhìn chung, YOLO có lợi thế về tốc độ và quá trình train dễ theo dõi, Faster R-CNN cho chất lượng trực quan ổn định nhất trong các hình đã xuất, còn DETR thể hiện đúng tinh thần của một mô hình transformer hiện đại nhưng cần điều chỉnh thêm để giảm bỏ sót ở object nhỏ hoặc sát biên. Trên bộ dữ liệu có phân bố lớp lệch như bài toán cờ vua, các lớp hiếm vẫn là điểm khó chung của cả ba mô hình.
 
 \section{Kết luận}
 
 Bài thực hành 03 đã hoàn thành việc xây dựng pipeline phát hiện đối tượng trên bộ dữ liệu Chess Pieces với ba mô hình YOLO, DETR và Faster R-CNN. Nhóm đã chuẩn hóa dữ liệu sang các định dạng cần thiết, huấn luyện các mô hình, xuất hình prediction và tổng hợp kết quả để so sánh trực quan.
 
-Qua thực nghiệm, nhóm quan sát được ba điểm chính. Thứ nhất, bộ dữ liệu có tính mất cân bằng rõ rệt nên các lớp hiếm khó được mô hình học tốt như các lớp xuất hiện nhiều. Thứ hai, YOLO cho tốc độ và tính ổn định cao, phù hợp với mục tiêu triển khai nhanh. Thứ ba, DETR và Faster R-CNN đều mang lại góc nhìn thú vị về detection hiện đại, trong đó DETR cho thấy đặc trưng end-to-end còn Faster R-CNN thể hiện sự ổn định của detector hai giai đoạn.
+Qua thực nghiệm, nhóm quan sát được ba điểm chính. Thứ nhất, bộ dữ liệu có tính mất cân bằng rõ rệt nên các lớp hiếm khó được mô hình học tốt như các lớp xuất hiện nhiều. Thứ hai, YOLO học nhanh và đạt metric validation tốt, nhưng vẫn có false positive hoặc confidence thấp trong một số ảnh test. Thứ ba, DETR và Faster R-CNN đều mang lại góc nhìn thú vị về detection hiện đại, trong đó DETR cho thấy đặc trưng end-to-end nhưng dễ bỏ sót object sát biên, còn Faster R-CNN thể hiện sự ổn định của detector hai giai đoạn qua confusion matrix và prediction mẫu.
 
 Về mặt học thuật, bài thực hành giúp nhóm hiểu rõ hơn sự khác nhau giữa các họ mô hình phát hiện đối tượng, vai trò của định dạng annotation và ảnh hưởng của ngưỡng confidence khi trực quan hóa kết quả. Trong ứng dụng thực tế, việc chọn mô hình sẽ phụ thuộc vào yêu cầu về tốc độ, độ ổn định và mức độ phù hợp với dữ liệu đầu vào.
 
