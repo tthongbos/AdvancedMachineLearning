@@ -94,6 +94,25 @@ Trần Hạ Khánh Duy & 100\% & Hoàn thành phần được phân công, phố
 \bottomrule
 \end{longtable}
 
+\subsection*{Checklist tự đánh giá nội dung}
+
+\begin{longtable}{p{0.08\textwidth}p{0.34\textwidth}p{0.46\textwidth}}
+\toprule
+\textbf{STT} & \textbf{Yêu cầu} & \textbf{Tự đánh giá kết quả thực hiện} \\
+\midrule
+1 & Chọn dataset phù hợp cho object detection & Hoàn thành. Nhóm sử dụng bộ dữ liệu Chess Pieces 416x416 Augmented, có mô tả số lượng ảnh, split train/valid/test, số lượng bounding box, số lớp và đặc điểm mất cân bằng dữ liệu. \\
+2 & Cung cấp ít nhất 2 liên kết tải dữ liệu & Hoàn thành. Báo cáo có link gốc Roboflow và link reup Google Drive để truy xuất bộ dữ liệu. \\
+3 & Thực nghiệm với YOLO & Hoàn thành. Notebook có pipeline chuyển nhãn sang định dạng YOLO, fine-tune YOLOv8n, xuất training curve, confusion matrix, prediction và evaluation curve. \\
+4 & Thực nghiệm với DETR & Hoàn thành. Notebook fine-tune DETR bằng Hugging Face Transformers, xuất training curve, confusion matrix, prediction và evaluation curve. \\
+5 & Thực nghiệm thêm một mô hình ngoài YOLO và DETR & Hoàn thành. Nhóm chọn Faster R-CNN của TorchVision, huấn luyện trên cùng dataset và xuất các kết quả đánh giá tương ứng. \\
+6 & So sánh và phân tích kết quả thực nghiệm & Hoàn thành. Báo cáo so sánh ba mô hình bằng confusion matrix, đường cong đánh giá, ảnh prediction cùng test case và các failure case. \\
+7 & Hình ảnh minh chứng chức năng/kết quả & Hoàn thành. Thư mục \texttt{doc/figures} chứa ảnh mẫu dataset, ground truth, training curve, confusion matrix, prediction và ảnh so sánh giữa các mô hình. \\
+8 & Cấu trúc bài nộp gồm \texttt{source} và \texttt{doc} & Hoàn thành. Thư mục \texttt{source} chứa notebook mã nguồn; thư mục \texttt{doc} chứa file PDF, nguồn LaTeX và hình minh chứng. \\
+9 & Mã nguồn có chú thích và thông tin thư viện & Hoàn thành ở mức notebook. Notebook có chú thích cho các bước chính và cell cài đặt thư viện cần dùng; khi nộp có thể bổ sung thêm file \texttt{requirements.txt} để tái lập môi trường thuận tiện hơn. \\
+10 & Báo cáo riêng biệt, không chụp mã nguồn vào báo cáo & Hoàn thành. Báo cáo dùng mô tả, bảng, biểu đồ và hình kết quả; không đưa trực tiếp mã nguồn vào nội dung báo cáo. \\
+\bottomrule
+\end{longtable}
+
 \section{Cơ sở lý thuyết và cách cài đặt}
 
 \subsection{Tổng quan dữ liệu và tiền xử lý}
