@@ -156,7 +156,7 @@ Trần Hà Khánh Duy & Kiểm tra split dữ liệu, hỗ trợ chạy option n
 \section{Mô tả đề bài và dữ liệu}
 Bài toán nhóm thực hiện là \important{phân đoạn nhị phân vùng gãy xương trên ảnh X-quang}. Mỗi ảnh đi kèm một mask. Nếu ảnh thuộc nhóm \textit{fracture}, mask đánh dấu vùng gãy cần tìm; nếu ảnh thuộc nhóm \textit{normal}, mask đúng sẽ là mask rỗng. Dataset được phân công là \code{FracAtlas/segmentation}; nhóm dùng đúng các file \code{train.csv}, \code{val.csv}, \code{test.csv} có sẵn và không tự chia lại dữ liệu.
 
-Dataset được chuẩn bị dưới dạng file nén \href{https://drive.google.com/file/d/1DeJK1z59TNTuqAwA8jnhPQHO37amdYNn/view?usp=sharing}{\code{segmentation.zip}}. Khi chạy trên Colab, nhóm copy file từ Drive về \code{/content/segmentation.zip} rồi giải nén vào \code{/content/segmentation\_extracted/segmentation}. Lý do làm bước này khá thực tế: đọc nhiều ảnh nhỏ trực tiếp từ Drive dễ chậm và đôi khi bị ngắt, còn đọc từ ổ local của Colab thì ổn định hơn.
+Dataset được chuẩn bị dưới dạng file nén \href{https://drive.google.com/file/d/1DeJK1z59TNTuqAwA8jnhPQHO37amdYNn/view?usp=sharing}{\code{segmentation.zip}}. Khi chạy trên Colab, nhóm copy file từ Drive về \code{/content/segmentation.zip} rồi giải nén vào \code{/content/segmentation\_extracted/segmentation}. Mục đích của bước này là tăng độ ổn định khi chạy thí nghiệm: đọc nhiều ảnh nhỏ trực tiếp từ Drive có thể chậm hoặc bị ngắt, trong khi đọc từ ổ local của Colab thường ổn định hơn.
 
 \textbf{Cấu trúc dữ liệu sau khi giải nén:}
 \begin{lstlisting}
@@ -190,7 +190,7 @@ No-resize & 192 ảnh train & 128 ảnh val & 160 ảnh test subset: 23 fracture
 \end{tabularx}
 \end{table}
 
-Dữ liệu bị lệch khá rõ: trong raw train, ảnh fracture chỉ chiếm khoảng 17.6\%. Vùng gãy cũng thường rất nhỏ so với cả ảnh X-quang. Vì vậy nếu chỉ nhìn metric trung bình trên toàn bộ test, kết quả có thể bị nhóm ảnh normal mask rỗng làm đẹp lên. Trong phần kết quả, nhóm tách riêng metric trên các ảnh thật sự có mask fracture để nhìn đúng hơn khả năng phân đoạn.
+Dữ liệu bị lệch khá rõ: trong raw train, ảnh fracture chỉ chiếm khoảng 17.6\%. Vùng gãy cũng thường rất nhỏ so với cả ảnh X-quang. Vì vậy nếu chỉ nhìn metric trung bình trên toàn bộ test, kết quả có thể bị ảnh hưởng mạnh bởi nhóm ảnh normal có mask rỗng. Trong phần kết quả, nhóm tách riêng metric trên các ảnh thật sự có mask fracture để đánh giá rõ hơn khả năng phân đoạn.
 
 \section{Phương pháp và mô hình}
 Mô hình được phân công là \important{U-Net++}; nhóm triển khai lại bằng PyTorch để train và đánh giá trên dataset được giao. Mô hình gồm encoder pretrained để lấy đặc trưng từ ảnh X-quang và decoder U-Net++ để dựng lại bản đồ phân đoạn. Output cuối là một kênh logit; sau đó nhóm dùng sigmoid và threshold để chuyển thành mask nhị phân.
@@ -288,7 +288,7 @@ Balanced validation score trong giai đoạn monitor được tính theo hướn
 \]
 Điểm này chỉ dùng để chọn checkpoint/threshold trên validation, không thay cho metric test cuối.
 
-Sau khi model dự đoán mask, nhóm có thêm bước hậu xử lý. Bước này lọc connected components quá nhỏ và kiểm soát tổng diện tích mask dự đoán. Riêng baseline resize dùng thêm image-level gate để giảm false positive trên ảnh normal. Bộ tham số tốt nhất trên validation resize là \code{seg\_threshold=0.08}, \code{gate\_max\_prob\_threshold=0.55}, \code{gate\_min\_soft\_area\_ratio=0.0005}. Với no-resize, nhóm tắt gate này vì sợ xóa mất các vùng fracture nhỏ.
+Sau khi model dự đoán mask, nhóm có thêm bước hậu xử lý. Bước này lọc connected components quá nhỏ và kiểm soát tổng diện tích mask dự đoán. Riêng baseline resize dùng thêm image-level gate để giảm false positive trên ảnh normal. Bộ tham số tốt nhất trên validation resize là \code{seg\_threshold=0.08}, \code{gate\_max\_prob\_threshold=0.55}, \code{gate\_min\_soft\_area\_ratio=0.0005}. Với no-resize, nhóm tắt gate này để hạn chế nguy cơ loại bỏ nhầm các vùng fracture nhỏ.
 
 \begin{table}[H]
 \centering
@@ -326,9 +326,9 @@ Theo phân loại case trên test, baseline có 36 \textit{good case}, 48 \texti
 \section{Option no-resize / giữ kích thước ảnh gốc}
 Mode \code{no\_resize\_original} được dùng để kiểm tra hướng giữ nguyên kích thước ảnh gốc. Trong lần chạy này, nhóm \important{không resize, không padding và không cap cạnh dài}. Nói cách khác, ảnh và mask được đưa vào model đúng như kích thước ban đầu của từng ảnh. \textit{Cap cạnh dài} là cách thường dùng để giảm tải bộ nhớ: nếu ảnh quá lớn, ta thu nhỏ toàn bộ ảnh theo cùng một tỉ lệ sao cho cạnh dài nhất không vượt quá một ngưỡng đặt trước. Vì nhóm không cap cạnh dài, kích thước input thay đổi khá nhiều giữa các ảnh, batch size phải để bằng 1 và decoder phải giảm kênh xuống \([16,32,64,96]\) cho vừa giới hạn Colab free.
 
-Thử nghiệm này cho thấy pipeline ảnh gốc chạy được, nhưng chưa thể xem là cấu hình tối ưu. Khi giữ ảnh gốc, số pixel nền tăng lên rất nhiều trong khi vùng fracture vẫn nhỏ. Bộ nhớ GPU cũng không chỉ phụ thuộc vào ảnh đầu vào, mà còn phụ thuộc vào activation của encoder, decoder và các skip connection của U-Net++. Vì vậy no-resize dễ OOM hơn baseline resize. Nhóm đã bật AMP, gradient accumulation, decoder checkpoint và cơ chế bỏ qua batch OOM để quá trình train không dừng hẳn. Dù vậy, log train vẫn ghi nhận 18 batch bị skip OOM ở các epoch sau, nên giới hạn tài nguyên có ảnh hưởng thật đến lượng dữ liệu model học được.
+Thử nghiệm này cho thấy pipeline ảnh gốc có thể vận hành, nhưng chưa thể xem là cấu hình tối ưu. Khi giữ ảnh gốc, số pixel nền tăng lên rất nhiều trong khi vùng fracture vẫn nhỏ. Bộ nhớ GPU cũng không chỉ phụ thuộc vào ảnh đầu vào, mà còn phụ thuộc vào activation của encoder, decoder và các skip connection của U-Net++. Vì vậy no-resize dễ OOM hơn baseline resize. Nhóm đã bật AMP, gradient accumulation, decoder checkpoint và cơ chế bỏ qua batch OOM để quá trình train không bị dừng giữa chừng. Dù vậy, log train vẫn ghi nhận 18 batch bị skip OOM ở các epoch sau, nên giới hạn tài nguyên có ảnh hưởng thật đến lượng dữ liệu model học được.
 
-Thời gian chạy của no-resize cũng không đều: epoch đầu khoảng 236.5 giây, epoch 2 khoảng 250.1 giây, còn các epoch sau khoảng 65-68 giây nhưng vẫn có batch OOM bị bỏ qua. Chênh lệch này đến từ kích thước ảnh không đồng nhất, cache/data loading và số batch thực tế được xử lý sau khi skip. Vì vậy nhóm chỉ chạy 192 ảnh train, 128 ảnh validation và 160 ảnh test subset để notebook còn chạy được trên Colab free. Nếu có GPU VRAM lớn hơn, hướng này có thể được thử nghiêm túc hơn bằng cách tăng số mẫu, tăng decoder channels, train lâu hơn, hoặc dùng tiling/padding hợp lý.
+Thời gian chạy của no-resize cũng không đều: epoch đầu khoảng 236.5 giây, epoch 2 khoảng 250.1 giây, còn các epoch sau khoảng 65-68 giây nhưng vẫn có batch OOM bị bỏ qua. Chênh lệch này đến từ kích thước ảnh không đồng nhất, cache/data loading và số batch thực tế được xử lý sau khi skip. Vì vậy nhóm chỉ chạy 192 ảnh train, 128 ảnh validation và 160 ảnh test subset để phù hợp với giới hạn của Colab free. Nếu có GPU VRAM lớn hơn, hướng này có thể được đánh giá đầy đủ hơn bằng cách tăng số mẫu, tăng decoder channels, train lâu hơn, hoặc dùng tiling/padding hợp lý.
 
 \begin{table}[H]
 \centering
@@ -339,7 +339,7 @@ Thời gian chạy của no-resize cũng không đều: epoch đầu khoảng 23
 \hline
 Baseline resize & Resize vuông về \(256 \times 256\), full test 613 ảnh. & Dice full test 0.369738; Dice positive 0.496755. & Ổn định hơn, train được 40 epoch, nhưng false positive trên normal còn cao. \\
 \hline
-No-resize original & Giữ nguyên kích thước ảnh gốc, batch size 1, subset test 160 ảnh. & Dice all 0.856250; IoU all 0.856250; Dice positive 0.000000. & Chạy được pipeline ảnh gốc nhưng thất bại trên ảnh fracture; metric all cao do nhiều ảnh normal dự đoán rỗng đúng. \\
+No-resize original & Giữ nguyên kích thước ảnh gốc, batch size 1, subset test 160 ảnh. & Dice all 0.856250; IoU all 0.856250; Dice positive 0.000000. & Pipeline ảnh gốc vận hành được nhưng chưa phân đoạn được ảnh fracture; metric all cao do nhiều ảnh normal được dự đoán rỗng đúng. \\
 \hline
 \end{tabularx}
 \end{table}
@@ -353,7 +353,7 @@ Khi kiểm tra coverage, baseline resize có đủ 613/613 image id trong test.c
 
 
 \section{Hình minh họa kết quả}
-Các hình dưới đây được lấy từ output thật trong thư mục \code{figures\_overlay}. Mỗi hình gồm ảnh đầu vào, ground truth mask, predicted mask và overlay, nên có thể nhìn trực tiếp model đúng sai ở đâu thay vì chỉ đọc metric.
+Các hình dưới đây được lấy từ output thật trong thư mục \code{figures\_overlay}. Mỗi hình gồm ảnh đầu vào, ground truth mask, predicted mask và overlay, giúp quan sát trực quan các trường hợp dự đoán đúng hoặc sai thay vì chỉ dựa vào metric.
 
 \begin{figure}[H]
 \centering
@@ -388,17 +388,17 @@ Các hình dưới đây được lấy từ output thật trong thư mục \cod
 \begin{figure}[H]
 \centering
 \imgmaybe{figures_overlay/overlay_no_resize_original_fracture_false_negative_IMG0000188.jpg.png}{overlay\_no\_resize\_original\_fracture\_false\_negative\_IMG0000188.jpg.png}
-\caption{No-resize - fracture false negative. Mode giữ ảnh gốc chạy được nhưng chưa bắt được vùng fracture trong case này.}
+\caption{No-resize - fracture false negative. Mode giữ ảnh gốc vận hành được nhưng chưa phát hiện được vùng fracture trong trường hợp này.}
 \end{figure}
 
 \section{Phân tích và nhận xét}
-Baseline resize cho thấy mô hình đã học được tín hiệu fracture ở mức nhất định. Dice positive đạt 0.496755 và Recall positive đạt 0.565802, tức là trên nhóm ảnh có mask thật, mô hình bắt được hơn một nửa vùng fracture theo trung bình. Điểm yếu rõ nhất là Precision positive 0.491880 và số normal false positive còn cao, nghĩa là mô hình vẫn hay vẽ thừa mask trên ảnh normal.
+Baseline resize cho thấy mô hình đã học được tín hiệu fracture ở mức nhất định. Dice positive đạt 0.496755 và Recall positive đạt 0.565802, tức là trên nhóm ảnh có mask thật, mô hình bắt được hơn một nửa vùng fracture theo trung bình. Điểm yếu rõ nhất là Precision positive 0.491880 và số normal false positive còn cao, nghĩa là mô hình vẫn tạo nhiều mask dự đoán không cần thiết trên ảnh normal.
 
 Theo nhóm, false positive có thể đến từ vài nguyên nhân. Vùng gãy thường nhỏ và biên không rõ, nên cạnh xương hoặc vùng tương phản mạnh dễ bị model nhầm là tổn thương. Ngoài ra, nhóm có oversampling ảnh fracture để model gặp nhiều positive hơn trong train; cách này giúp tăng cơ hội học fracture nhưng cũng có thể làm model nhạy quá mức với các chi tiết giống fracture. Cuối cùng, threshold 0.08 của baseline khá thấp để giữ lại fracture nhỏ, nên một số vùng nhiễu cũng bị giữ lại.
 
-No-resize chạy được về mặt kỹ thuật, nhưng chất lượng chưa đạt. Khi giữ ảnh gốc, fracture bị ``loãng'' trong một vùng nền lớn hơn. Cấu hình no-resize lại phải giảm decoder, dùng batch size 1, train ít epoch hơn và chỉ chạy subset để tránh OOM trên Colab free. Val score đứng ở 0.30000 trong nhiều epoch; trên test subset, toàn bộ ảnh fracture bị false negative. Như vậy mô hình ở cấu hình này chủ yếu học cách dự đoán rỗng để đúng trên ảnh normal, chứ chưa học được vùng fracture.
+No-resize vận hành được về mặt kỹ thuật, nhưng chất lượng chưa đạt. Khi giữ ảnh gốc, vùng fracture chiếm tỷ lệ nhỏ hơn trong toàn ảnh do phần nền lớn hơn. Cấu hình no-resize lại phải giảm decoder, dùng batch size 1, train ít epoch hơn và chỉ chạy subset để tránh OOM trên Colab free. Val score đứng ở 0.30000 trong nhiều epoch; trên test subset, toàn bộ ảnh fracture bị false negative. Như vậy, ở cấu hình hiện tại, mô hình có xu hướng dự đoán rỗng trên ảnh normal nhưng chưa học được đặc trưng của vùng fracture.
 
-Dù vậy, nhóm vẫn thấy no-resize là hướng đáng thử tiếp vì nó giữ được hình dạng và tỉ lệ ảnh gốc. Nếu có tài nguyên tốt hơn, có thể tăng số mẫu, train lâu hơn, tăng decoder channels, dùng tiling hoặc padding theo batch để giảm OOM, rồi tune riêng threshold/postprocess cho no-resize. Với baseline resize, hướng cải thiện quan trọng nhất là giảm false positive, chẳng hạn bằng hard negative mining hoặc một image-level classifier/gate tốt hơn.
+Dù vậy, no-resize vẫn là hướng đáng tiếp tục thử nghiệm vì nó giữ được hình dạng và tỉ lệ ảnh gốc. Nếu có tài nguyên tốt hơn, có thể tăng số mẫu, train lâu hơn, tăng decoder channels, dùng tiling hoặc padding theo batch để giảm OOM, rồi tune riêng threshold/postprocess cho no-resize. Với baseline resize, hướng cải thiện quan trọng nhất là giảm false positive, chẳng hạn bằng hard negative mining hoặc một image-level classifier/gate tốt hơn.
 
 \section{Công cụ AI hỗ trợ và cam kết}
 \begin{table}[H]
@@ -423,7 +423,7 @@ Các thành viên có thể giải thích bài nộp không? & Có. Các thành 
 \section{Kết luận}
 Nhóm đã hoàn thành baseline resize cho bài toán segmentation ảnh X-quang với dataset \code{FracAtlas/segmentation} và mô hình \textbf{U-Net++} được phân công. Với encoder EfficientNet-B3 pretrained ImageNet, kết quả đạt Dice 0.369738 trên full test và Dice 0.496755 trên nhóm ảnh có mask fracture thật.
 
-Option no-resize đã được triển khai theo hướng giữ kích thước ảnh gốc, không resize và không cap cạnh dài. Cap cạnh dài ở đây là thao tác thu nhỏ ảnh theo tỉ lệ khi cạnh lớn nhất vượt quá một ngưỡng cố định; nhóm không dùng thao tác này để kiểm tra đúng pipeline ảnh gốc. Tuy nhiên do giới hạn tài nguyên Colab free, mode này chỉ chạy subset và phải dùng cấu hình nhẹ. Kết quả no-resize hiện tại chưa tốt trên ảnh fracture vì toàn bộ 23 ảnh fracture trong subset bị false negative. Bài học chính là với dữ liệu có nhiều mask rỗng, cần đọc metric theo từng nhóm ảnh, đặc biệt là metric trên ảnh có tổn thương thật, thay vì chỉ nhìn Dice trung bình toàn test.
+Option no-resize đã được triển khai theo hướng giữ kích thước ảnh gốc, không resize và không cap cạnh dài. Cap cạnh dài ở đây là thao tác thu nhỏ ảnh theo tỉ lệ khi cạnh lớn nhất vượt quá một ngưỡng cố định; nhóm không dùng thao tác này để kiểm tra đúng pipeline ảnh gốc. Tuy nhiên do giới hạn tài nguyên Colab free, mode này chỉ chạy subset và phải dùng cấu hình nhẹ. Kết quả no-resize hiện tại chưa đạt yêu cầu trên ảnh fracture vì toàn bộ 23 ảnh fracture trong subset bị false negative. Bài học chính là với dữ liệu có nhiều mask rỗng, cần đọc metric theo từng nhóm ảnh, đặc biệt là metric trên ảnh có tổn thương thật, thay vì chỉ nhìn Dice trung bình toàn test.
 
 \section{Checklist trước khi nộp}
 \begin{itemize}
