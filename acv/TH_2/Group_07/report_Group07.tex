@@ -1,0 +1,311 @@
+% !TEX program = xelatex
+% Compile with XeLaTeX:
+% xelatex -interaction=nonstopmode report_Group07.tex
+% xelatex -interaction=nonstopmode report_Group07.tex
+\documentclass[12pt,a4paper]{article}
+
+% ===== Page setup =====
+\usepackage[a4paper,top=2.2cm,bottom=2.2cm,left=2.5cm,right=2.0cm]{geometry}
+\usepackage{fontspec}
+\IfFontExistsTF{Times New Roman}{
+  \setmainfont{Times New Roman}
+  \setsansfont{Times New Roman}
+}{
+  \IfFontExistsTF{TeX Gyre Termes}{
+    \setmainfont{TeX Gyre Termes}
+    \setsansfont{TeX Gyre Termes}
+  }{
+    \setmainfont{Tinos}
+    \setsansfont{Tinos}
+  }
+}
+\setmonofont{DejaVu Sans Mono}
+\XeTeXlinebreaklocale "vi"
+\XeTeXlinebreakskip = 0pt plus 1pt
+
+% ===== Packages =====
+\usepackage{graphicx}
+\usepackage{tabularx}
+\usepackage{array}
+\usepackage{booktabs}
+\usepackage{float}
+\usepackage{caption}
+\usepackage{enumitem}
+\usepackage{amsmath}
+\usepackage[table]{xcolor}
+\usepackage{titlesec}
+\usepackage{fancyhdr}
+\usepackage{hyperref}
+\usepackage{lastpage}
+
+% ===== Style =====
+\definecolor{headingblue}{RGB}{31,78,121}
+\definecolor{tablehead}{RGB}{221,235,247}
+\hypersetup{colorlinks=true, linkcolor=black, urlcolor=blue, citecolor=black}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{6pt}
+\setlist[itemize]{leftmargin=1.5em,itemsep=2pt,topsep=2pt}
+\renewcommand{\arraystretch}{1.25}
+\newcolumntype{Y}{>{\raggedright\arraybackslash}X}
+\newcolumntype{C}[1]{>{\centering\arraybackslash}p{#1}}
+\sloppy
+\emergencystretch=2em
+
+\titleformat{\section}
+  {\color{headingblue}\bfseries\fontsize{14.5pt}{18pt}\selectfont}
+  {\thesection.}{0.5em}{}
+\titlespacing*{\section}{0pt}{12pt}{6pt}
+\captionsetup{font=small,labelfont=bf}
+\renewcommand{\figurename}{Hình}
+\renewcommand{\tablename}{Bảng}
+
+\pagestyle{fancy}
+\fancyhf{}
+\lhead{Group\_07 - Báo cáo thực hành}
+\rhead{Thị giác máy tính nâng cao}
+\cfoot{\thepage/\pageref{LastPage}}
+\setlength{\headheight}{15pt}
+\renewcommand{\headrulewidth}{0.4pt}
+
+\newcommand{\thead}[1]{\cellcolor{tablehead}\textbf{#1}}
+\newcommand{\metric}[1]{\textbf{#1}}
+\newcommand{\reportcode}[1]{\textnormal{\textcolor{headingblue}{#1}}}
+\newcommand{\imgmaybe}[2]{%
+  \IfFileExists{#1}{\includegraphics[width=\linewidth]{#1}}{%
+    \fbox{\begin{minipage}[c][4.5cm][c]{0.92\linewidth}\centering\small Chưa tìm thấy hình: \reportcode{#2}\end{minipage}}%
+  }%
+}
+
+\begin{document}
+
+\begin{center}
+{\bfseries\fontsize{16pt}{22pt}\selectfont BÁO CÁO BÀI THỰC HÀNH\\PHÂN ĐOẠN VÀ PHÂN LỚP ẢNH Y KHOA}\par
+\vspace{0.45em}
+{\fontsize{13pt}{18pt}\selectfont Môn: Thị giác máy tính nâng cao}\par
+\vspace{0.25em}
+{\fontsize{13pt}{18pt}\selectfont Nhóm: \textbf{Group\_07}}\par
+\end{center}
+
+\section{Thông tin nhóm}
+\begin{table}[H]
+\centering
+\begin{tabularx}{\textwidth}{|p{4.2cm}|Y|}
+\hline
+\thead{Nội dung} & \thead{Thông tin} \\
+\hline
+Nhóm & Group\_07 \\
+\hline
+Thành viên 1 & Nguyễn Thái Thông \\
+\hline
+Thành viên 2 & Trần Hà Khánh Duy \\
+\hline
+Bài toán được giao & Segmentation ảnh X-quang y khoa, phân đoạn vùng gãy xương \\
+\hline
+Dataset & \reportcode{FracAtlas/segmentation} \\
+\hline
+Mô hình & U-Net++-SE, encoder EfficientNet-B3 pretrained ImageNet \\
+\hline
+\end{tabularx}
+\end{table}
+
+\section{Phân công công việc trong nhóm}
+\begin{table}[H]
+\centering
+\small
+\begin{tabularx}{\textwidth}{|p{3.45cm}|Y|p{1.65cm}|p{2.75cm}|}
+\hline
+\thead{Thành viên} & \thead{Công việc phụ trách} & \thead{Tỷ lệ đóng góp} & \thead{Ghi chú} \\
+\hline
+Nguyễn Thái Thông & Chuẩn bị pipeline đọc dữ liệu và mask, cấu hình mô hình U-Net++-SE, chạy baseline resize \(256 \times 256\), kiểm tra loss/metric, tune threshold và postprocess, tổng hợp kết quả chính để đưa vào báo cáo. & 50\% & Phụ trách pipeline, mô hình, huấn luyện baseline và phân tích metric. \\
+\hline
+Trần Hà Khánh Duy & Kiểm tra split dữ liệu, hỗ trợ chạy và rà option no-resize, xuất hình overlay, kiểm tra kết quả trong CSV/notebook, đối chiếu các case đúng-sai và hoàn thiện phần nhận xét. & 50\% & Phụ trách kiểm tra kết quả, hình minh họa, no-resize và rà soát báo cáo. \\
+\hline
+\end{tabularx}
+\end{table}
+
+\section{Mô tả đề bài và dữ liệu}
+Bài toán được giao là segmentation ảnh X-quang y khoa. Mục tiêu là dự đoán mask nhị phân cho vùng gãy xương trên ảnh. Với ảnh fracture, mask thể hiện vùng tổn thương. Với ảnh normal, mask đúng là mask rỗng.
+
+Dataset sử dụng là \reportcode{FracAtlas/segmentation}. Nhóm dùng split có sẵn của dataset, không tự chia lại train/val/test. Dữ liệu bị mất cân bằng vì số ảnh normal nhiều hơn ảnh fracture, trong khi vùng fracture thường nhỏ, biên không rõ và dễ bị che bởi cấu trúc xương xung quanh.
+
+\begin{table}[H]
+\centering
+\scriptsize
+\begin{tabularx}{\textwidth}{|p{2.7cm}|p{2.85cm}|p{2.85cm}|p{2.85cm}|p{1.65cm}|Y|}
+\hline
+\thead{Tập dữ liệu} & \thead{Train} & \thead{Val} & \thead{Test} & \thead{Nhãn/lớp} & \thead{Ghi chú} \\
+\hline
+FracAtlas/segmentation & 2858 ảnh: 502 fracture, 2356 normal & 612 ảnh: 107 fracture, 505 normal & 613 ảnh: 108 fracture, 505 normal & 2 lớp & Split chính thức, không tự chia lại. \\
+\hline
+Baseline resize & 2858 ảnh train, có oversampling fracture & 612 ảnh & 613 ảnh full test & 2 lớp & Resize ảnh và mask về \(256 \times 256\). \\
+\hline
+Option no-resize & 192 ảnh train & 128 ảnh val & 160 ảnh test subset: 23 fracture, 137 normal & 2 lớp & Chỉ evaluate subset, không phải full test. \\
+\hline
+\end{tabularx}
+\end{table}
+
+\section{Phương pháp và mô hình}
+Mô hình chính là U-Net++-SE với encoder EfficientNet-B3 pretrained ImageNet. Ảnh X-quang grayscale được chuyển thành 3 kênh để phù hợp với encoder pretrained. Decoder dùng cấu trúc U-Net++ kết hợp SE block nhằm tăng khả năng chọn lọc kênh đặc trưng. Cấu trúc U-Net++ được chọn vì có các skip connection lồng nhau, giúp kết hợp đặc trưng mức thấp và mức cao tốt hơn trong bài toán phân đoạn vùng nhỏ.
+
+Loss function là tổ hợp Focal BCE with logits và Tversky loss:
+\[
+  \mathcal{L} = 0.35 \times \mathcal{L}_{\text{Focal BCE with logits}}
+  + 0.65 \times \mathcal{L}_{\text{Tversky}}.
+\]
+Focal BCE giúp mô hình tập trung hơn vào pixel khó, còn Tversky loss phù hợp với dữ liệu mất cân bằng giữa vùng fracture nhỏ và nền lớn.
+
+Cấu hình huấn luyện chính:
+\begin{itemize}
+  \item Optimizer: AdamW; scheduler: CosineAnnealingLR.
+  \item Learning rate encoder: \(3 \times 10^{-5}\); learning rate decoder: \(3.5 \times 10^{-4}\).
+  \item Weight decay: \(10^{-4}\).
+  \item Batch size baseline: 12; số epoch baseline: 40.
+  \item Batch size no-resize: 1; số epoch no-resize: 4.
+\end{itemize}
+
+\section{Tiền xử lý dữ liệu}
+Ảnh được đọc ở dạng grayscale, sau đó chuyển thành 3 kênh. Pixel ảnh được chuẩn hóa theo mean/std của ImageNet để phù hợp với encoder EfficientNet-B3 pretrained. Mask được chuyển thành nhị phân, trong đó pixel thuộc vùng fracture là 1 và nền là 0.
+
+Baseline resize đưa ảnh và mask về kích thước \(256 \times 256\). Ảnh dùng nội suy cho ảnh liên tục, còn mask dùng cách xử lý giữ nhị phân để tránh sinh giá trị trung gian sai. Augmentation gồm horizontal flip, vertical flip nhẹ, rotate nhẹ, autocontrast, contrast và brightness. Các augmentation được giữ ở mức vừa phải vì ảnh X-quang y khoa không nên biến đổi quá mạnh làm sai đặc trưng tổn thương.
+
+Option \reportcode{no\_resize\_original} giữ tỉ lệ ảnh, không resize vuông về \(256 \times 256\). Tuy nhiên vẫn cap cạnh dài tối đa 352 pixel để tránh OOM, nên đây không phải giữ nguyên kích thước gốc tuyệt đối.
+
+\section{Kết quả baseline resize}
+Baseline resize là phần bắt buộc và được đánh giá trên full test. Với segmentation, nhóm dùng Dice, IoU, Precision và Recall.
+
+\begin{table}[H]
+\centering
+\scriptsize
+\begin{tabularx}{\textwidth}{|p{3.0cm}|p{2.9cm}|C{1.25cm}|C{1.25cm}|C{1.45cm}|C{1.25cm}|Y|}
+\hline
+\thead{Dataset} & \thead{Model} & \thead{Dice} & \thead{IoU} & \thead{Precision} & \thead{Recall} & \thead{Ghi chú} \\
+\hline
+FracAtlas/segmentation full test & U-Net++-SE\newline EfficientNet-B3 & 0.347816 & 0.327381 & 0.346177 & 0.360089 & 613 ảnh test, gồm cả ảnh normal mask rỗng. \\
+\hline
+FracAtlas/segmentation positive only & U-Net++-SE\newline EfficientNet-B3 & 0.511216 & 0.395226 & 0.501913 & 0.580873 & Chỉ tính trên ảnh có mask fracture thật. \\
+\hline
+\end{tabularx}
+\end{table}
+
+Thông tin lỗi đáng chú ý của baseline: 347/505 ảnh normal bị dự đoán có mask, tương ứng normal false positive rate = 0.687129. Vì vậy baseline vẫn còn nhiều false positive trên ảnh normal. Khi đọc kết quả, cần xem riêng metric trên ảnh có fracture và ảnh normal, vì tập test có nhiều mask rỗng.
+
+\section{Option không resize hoặc giữ kích thước ảnh gốc}
+Option no-resize được triển khai để kiểm tra ảnh hưởng của việc giữ tỉ lệ ảnh thay vì ép toàn bộ ảnh về kích thước vuông \(256 \times 256\). Ở cấu hình này, ảnh không bị resize vuông như baseline, nhưng vẫn có giới hạn cạnh dài tối đa 352 pixel để tránh hết bộ nhớ GPU. Vì vậy, cách làm này nên hiểu là \textbf{giữ tỉ lệ ảnh có kiểm soát kích thước}, không phải giữ nguyên tuyệt đối kích thước ảnh gốc.
+
+Ban đầu nhóm đã thử train cấu hình no-resize trên Kaggle vì môi trường này ổn định hơn cho các thử nghiệm dài. Khi chuyển sang Colab free, cấu hình phải giảm xuống mức nhẹ hơn để có thể chạy được: dùng batch size 1, decoder nhỏ hơn, số epoch ít hơn và chỉ đánh giá trên subset 160 ảnh. Đây là một hạn chế thực nghiệm thực tế, vì Colab free có dung lượng GPU và thời gian phiên chạy không ổn định, dễ bị OOM hoặc ngắt phiên nếu cấu hình quá nặng.
+
+Về bộ nhớ, no-resize tốn tài nguyên hơn baseline resize vì kích thước tensor không cố định và số pixel có thể lớn hơn \(256 \times 256\). Với segmentation, bộ nhớ không chỉ nằm ở ảnh đầu vào mà còn nằm ở activation của encoder, decoder, skip connection và các nhánh U-Net++. Khi \(H \times W\) tăng, bộ nhớ activation tăng gần tuyến tính theo số pixel, trong khi U-Net++ còn lưu nhiều feature map trung gian nên rủi ro OOM cao hơn. Vì batch gồm nhiều ảnh phải có kích thước tensor tương thích, cấu hình này buộc phải dùng batch size 1, làm gradient kém ổn định hơn và cần gradient accumulation nếu muốn mô phỏng batch lớn.
+
+Về thời gian chạy, no-resize cũng chậm hơn. Batch size 1 làm GPU khó tận dụng song song tốt như baseline batch size 12; ảnh có kích thước biến thiên làm data loading/collate phức tạp hơn; mỗi epoch xử lý ít mẫu hơn nhưng thời gian mỗi bước không giảm tương ứng. Vì vậy nhóm giảm số epoch no-resize xuống 4 và chỉ chạy subset để phù hợp với giới hạn Colab free. Đổi lại, kết quả no-resize chưa đủ tốt để kết luận mô hình hiệu quả ở chế độ giữ tỉ lệ.
+
+\begin{table}[H]
+\centering
+\small
+\begin{tabularx}{\textwidth}{|p{3.0cm}|p{3.45cm}|p{3.4cm}|Y|}
+\hline
+\thead{Cấu hình} & \thead{Input size/cách xử lý} & \thead{Metric chính} & \thead{Nhận xét} \\
+\hline
+Baseline resize & Resize vuông về \(256 \times 256\), đánh giá full test 613 ảnh. & Dice full test 0.347816; Dice positive 0.511216. & Dễ batch, ổn định bộ nhớ, train được 40 epoch. Có học được một phần vùng fracture nhưng false positive trên normal cao. \\
+\hline
+Option không resize/giữ tỷ lệ & Giữ tỉ lệ ảnh, cap cạnh dài 352, batch size 1, evaluate subset 160 ảnh. & Dice all 0.856250; IoU all 0.856250; Dice positive 0.000000. & Tốn bộ nhớ và thời gian hơn, phải giảm cấu hình để chạy trên Colab free. Không thành công trên ảnh fracture; Dice all cao do nhiều ảnh normal được dự đoán rỗng đúng. \\
+\hline
+\end{tabularx}
+\end{table}
+
+Subset no-resize có 137 normal true negative và 23 fracture false negative. Vì toàn bộ 23 ảnh fracture trong subset bị false negative, các metric positive Dice/IoU/Precision/Recall đều bằng 0. Do đó không được trình bày no-resize là thành công. Kết quả này cho thấy cấu hình giữ tỉ lệ hiện tại mới chỉ là thử nghiệm ban đầu, chưa đủ mạnh để thay thế baseline resize.
+
+\section{Hình minh họa kết quả}
+Các hình minh họa được lấy từ thư mục \reportcode{figures/}. Mỗi hình thể hiện kết quả trực quan gồm ảnh đầu vào, mask thật, mask dự đoán hoặc overlay tùy file đã xuất từ notebook.
+
+\begin{figure}[H]
+\centering
+\begin{minipage}{0.48\textwidth}
+  \centering
+  \imgmaybe{figures/overlay_resize_256_good_case_IMG0002738.jpg.png}{overlay\_resize\_256\_good\_case\_IMG0002738.jpg.png}
+  \caption*{Baseline resize - good case.}
+\end{minipage}\hfill
+\begin{minipage}{0.48\textwidth}
+  \centering
+  \imgmaybe{figures/overlay_resize_256_medium_case_IMG0003510.jpg.png}{overlay\_resize\_256\_medium\_case\_IMG0003510.jpg.png}
+  \caption*{Baseline resize - medium case.}
+\end{minipage}
+\caption{Một số kết quả baseline resize trên ảnh fracture.}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\begin{minipage}{0.48\textwidth}
+  \centering
+  \imgmaybe{figures/overlay_resize_256_normal_false_positive_IMG0002219.jpg.png}{overlay\_resize\_256\_normal\_false\_positive\_IMG0002219.jpg.png}
+  \caption*{Baseline resize - normal false positive.}
+\end{minipage}\hfill
+\begin{minipage}{0.48\textwidth}
+  \centering
+  \imgmaybe{figures/overlay_resize_256_fracture_false_negative_IMG0002840.jpg.png}{overlay\_resize\_256\_fracture\_false\_negative\_IMG0002840.jpg.png}
+  \caption*{Baseline resize - fracture false negative.}
+\end{minipage}
+\caption{Hai dạng lỗi thường gặp của baseline resize.}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\begin{minipage}{0.48\textwidth}
+  \centering
+  \imgmaybe{figures/overlay_resize_256_normal_true_negative_IMG0003222.jpg.png}{overlay\_resize\_256\_normal\_true\_negative\_IMG0003222.jpg.png}
+  \caption*{Baseline resize - normal true negative.}
+\end{minipage}\hfill
+\begin{minipage}{0.48\textwidth}
+  \centering
+  \imgmaybe{figures/overlay_no_resize_original_fracture_false_negative_IMG0000188.jpg.png}{overlay\_no\_resize\_original\_fracture\_false\_negative\_IMG0000188.jpg.png}
+  \caption*{No-resize - fracture false negative.}
+\end{minipage}
+\caption{So sánh trực quan normal đúng và lỗi no-resize trên ảnh fracture.}
+\end{figure}
+
+\section{Phân tích và nhận xét}
+Baseline resize có tín hiệu học được vùng fracture, thể hiện qua Dice positive = 0.511216. Tuy nhiên kết quả full test thấp hơn vì số false positive trên normal cao và mô hình còn dự đoán nhiễu ở nhiều ảnh không có fracture.
+
+False positive là lỗi lớn nhất: 347/505 ảnh normal bị dự đoán có mask. Một nguyên nhân có thể là fracture chiếm diện tích nhỏ, dữ liệu mất cân bằng và mô hình dễ nhầm các đường biên xương hoặc vùng tương phản mạnh thành vùng gãy. Ngoài ra, threshold sau cùng khá thấp để tăng khả năng bắt vùng fracture nhỏ, nên mô hình dễ sinh thêm mask giả trên ảnh normal.
+
+Option no-resize chưa đạt mục tiêu. Dice all = 0.856250 nhìn cao nhưng chủ yếu do 137 ảnh normal được dự đoán rỗng đúng. Trên ảnh fracture, kết quả thất bại vì 23/23 ảnh fracture trong subset là false negative, làm Dice positive = 0.000000. Nói cách khác, metric all bị ảnh normal chi phối và không phản ánh đúng khả năng phân đoạn vùng gãy xương.
+
+Hạn chế của no-resize đến từ cả tài nguyên tính toán và cấu hình huấn luyện. Khi giữ tỉ lệ ảnh, kích thước đầu vào thay đổi theo từng ảnh; nếu giữ ảnh quá lớn, bộ nhớ GPU tăng nhanh do phải lưu activation ở nhiều tầng encoder-decoder và các skip connection của U-Net++. Do đó nhóm phải cap cạnh dài 352, dùng batch size 1 và giảm số epoch. Việc giảm cấu hình giúp chạy được trên Colab free sau khi đã thử trước trên Kaggle, nhưng cũng làm mô hình học chưa đủ lâu và chưa đủ ổn định. Batch size 1 cũng làm gradient nhiễu hơn, còn thời gian train/evaluate tăng vì GPU không tận dụng được batch lớn như baseline.
+
+Về hướng cải thiện, no-resize nên được thử lại với padding hoặc tiling thay vì chỉ cap cạnh dài, train lâu hơn trên môi trường GPU ổn định hơn, tune riêng threshold/postprocess cho cấu hình no-resize, và đánh giá trên full test khi đủ tài nguyên. Với baseline resize, hướng cải thiện hợp lý là tune threshold và image-level gate tốt hơn, kiểm tra hard negative trên ảnh normal, và thêm cơ chế giảm false positive trước khi kết luận mô hình dùng được trong thực tế.
+
+\section{Công cụ AI hỗ trợ và cam kết}
+\begin{table}[H]
+\centering
+\begin{tabularx}{\textwidth}{|p{5cm}|Y|}
+\hline
+\thead{Nội dung} & \thead{Khai báo của nhóm} \\
+\hline
+Có sử dụng AI không? & Có. \\
+\hline
+Công cụ AI đã dùng & ChatGPT. \\
+\hline
+Phạm vi sử dụng & Hỗ trợ sửa lỗi code, gợi ý cấu trúc báo cáo, diễn giải metric và rà lại các chỗ dễ gây hiểu nhầm. Không dùng AI để bịa metric hoặc tạo hình minh họa giả. \\
+\hline
+Kết quả có truy vết từ notebook không? & Có. Metric và hình minh họa lấy từ notebook/file kết quả đã xuất. \\
+\hline
+Các thành viên có thể giải thích bài nộp không? & Có. Các thành viên nắm được pipeline dữ liệu, mô hình, loss, cách đánh giá và hạn chế của no-resize. \\
+\hline
+\end{tabularx}
+\end{table}
+
+\section{Kết luận}
+Nhóm đã hoàn thành baseline resize cho bài toán segmentation ảnh X-quang trên \reportcode{FracAtlas/segmentation}. Mô hình U-Net++-SE với encoder EfficientNet-B3 đạt Dice 0.347816 trên full test và Dice 0.511216 trên nhóm ảnh có mask thật.
+
+Kết quả baseline chưa cao vì false positive trên ảnh normal còn nhiều. Option no-resize có triển khai giữ tỉ lệ ảnh và cap cạnh dài 352, nhưng chỉ evaluate subset 160 ảnh và thất bại trên ảnh fracture với Dice positive = 0. Phần no-resize cho thấy việc giữ tỉ lệ ảnh không chỉ là thay đổi tiền xử lý, mà còn ảnh hưởng trực tiếp đến bộ nhớ GPU, batch size, thời gian chạy và độ ổn định huấn luyện. Nhóm đã phải giảm cấu hình từ thử nghiệm ban đầu trên Kaggle xuống mức phù hợp với Colab free, nên kết quả này được xem là thử nghiệm có giới hạn chứ chưa phải cấu hình tối ưu.
+
+\section{Checklist trước khi nộp}
+\begin{itemize}
+  \item \reportcode{report\_Group07.pdf}: xuất từ file \reportcode{report\_Group07.tex} bằng XeLaTeX.
+  \item \reportcode{results\_Group07.csv}: dùng file kết quả đã xuất từ notebook, không sửa metric thủ công.
+  \item \reportcode{notebook\_link.txt}: cần chứa link Colab đã chạy đầy đủ output và bật quyền xem.
+  \item \reportcode{PhanCong\_Group07.pdf} hoặc mục phân công trong báo cáo: đã có mục phân công 50\%/50\% trong báo cáo.
+  \item \reportcode{figures/}: chứa hình overlay/ảnh minh họa được tạo từ quá trình chạy thật.
+  \item File nộp Moodle: đặt đúng tên \reportcode{Group\_07.zip} nếu nộp bản cuối.
+\end{itemize}
+
+\end{document}
