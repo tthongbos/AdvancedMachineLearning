@@ -164,6 +164,10 @@ Cấu hình huấn luyện chính:
 \end{itemize}
 
 \section{Tiền xử lý dữ liệu}
+Trước khi huấn luyện, nhóm chuẩn bị dữ liệu thành một file zip để việc chạy lại trên môi trường Colab/Kaggle thuận tiện hơn. Toàn bộ thư mục dữ liệu gồm ảnh, mask và các file split được nén lại, sau đó lưu trên Google Drive. Khi chạy notebook, nhóm tải file zip từ Drive về môi trường chạy, giải nén vào thư mục làm việc và kiểm tra lại cấu trúc thư mục trước khi tạo dataset loader. Cách này giúp tránh phải upload nhiều file nhỏ riêng lẻ, giảm lỗi thiếu file và bảo đảm train/val/test dùng đúng cùng một bản dữ liệu.
+
+Sau khi giải nén, notebook đọc danh sách ảnh theo split có sẵn của \reportcode{FracAtlas/segmentation}, ghép đường dẫn ảnh với mask tương ứng và kiểm tra nhanh các trường hợp mask rỗng ở ảnh normal. Với ảnh fracture, mask được dùng làm ground truth phân đoạn; với ảnh normal, mask được xem là rỗng. Các ảnh hoặc mask không khớp đường dẫn sẽ được loại khỏi pipeline kiểm tra thay vì tự tạo dữ liệu giả.
+
 Ảnh được đọc ở dạng grayscale, sau đó chuyển thành 3 kênh. Pixel ảnh được chuẩn hóa theo mean/std của ImageNet để phù hợp với encoder EfficientNet-B3 pretrained. Mask được chuyển thành nhị phân, trong đó pixel thuộc vùng fracture là 1 và nền là 0.
 
 Baseline resize đưa ảnh và mask về kích thước \(256 \times 256\). Ảnh dùng nội suy cho ảnh liên tục, còn mask dùng cách xử lý giữ nhị phân để tránh sinh giá trị trung gian sai. Augmentation gồm horizontal flip, vertical flip nhẹ, rotate nhẹ, autocontrast, contrast và brightness. Các augmentation được giữ ở mức vừa phải vì ảnh X-quang y khoa không nên biến đổi quá mạnh làm sai đặc trưng tổn thương.
